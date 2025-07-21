@@ -1,15 +1,25 @@
 <?php
 
-/**
- * API routes should be registered here.
- *
- * - prefixed with `/api/` (by default)
- * - have `api` middleware (by default)
- */
-
+use App\Http\Controllers\Api\Auth\LoginApiController;
+use App\Http\Controllers\Api\Auth\MeApiController;
 use App\Http\Controllers\Api\TaskApiController;
 use App\Http\Controllers\Api\UserApiController;
 use Illuminate\Support\Facades\Route;
+
+/**
+ * Register API routes here.
+ *
+ * By default, namely:
+ * - path is prefixed with `/api/`
+ * - name is prefixed with `.api`
+ * - have `api` middleware
+ */
+
+Route::post('/login', LoginApiController::class)
+    ->name('auth.login');
+
+Route::post('/me', MeApiController::class)
+    ->name('auth.me');
 
 Route::get('/users', [UserApiController::class, 'index'])
     ->name('users.index');
@@ -35,5 +45,3 @@ Route::patch('/tasks/{id}', [TaskApiController::class, 'update'])
 Route::delete('/tasks/{id}', [TaskApiController::class, 'destroy'])
     ->where('id', '[1-9][0-9]*')
     ->name('tasks.destroy');
-
-
