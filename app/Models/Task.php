@@ -6,9 +6,11 @@ use App\Enum\TaskStatus;
 use App\Enum\TaskVisibility;
 use App\Queries\TaskQuery;
 use Database\Factories\TaskFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Query\Builder as DatabaseBuilder;
 use Illuminate\Support\Carbon;
 
@@ -22,7 +24,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *
- * @property User $user
+ * @property-read User $user
+ * @property-read Collection|Tag[] $tags
  *
  * @method static TaskQuery query()
  */
@@ -65,6 +68,16 @@ class Task extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the tags associated with the task.
+     *
+     * @return BelongsToMany
+     */
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class);
     }
 
     /**
