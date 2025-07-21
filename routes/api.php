@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Auth\LoginApiController;
 use App\Http\Controllers\Api\Auth\MeApiController;
+use App\Http\Controllers\Api\TagApiController;
 use App\Http\Controllers\Api\TaskApiController;
 use App\Http\Controllers\Api\UserApiController;
 use App\Http\Middleware\SanctumOrGuest;
@@ -26,6 +27,13 @@ Route::get('/users/{id}', [UserApiController::class, 'show'])
     ->where('id', '[1-9][0-9]*')
     ->name('users.show');
 
+Route::get('/tags', [TagApiController::class, 'index'])
+    ->name('tags.index');
+
+Route::get('/tags/{id}', [TagApiController::class, 'show'])
+    ->where('id', '[1-9][0-9]*')
+    ->name('tags.show');
+
 Route::middleware(['auth:sanctum'])
     ->group(function () {
         Route::get('/me', MeApiController::class)
@@ -41,6 +49,17 @@ Route::middleware(['auth:sanctum'])
         Route::delete('/tasks/{id}', [TaskApiController::class, 'destroy'])
             ->where('id', '[1-9][0-9]*')
             ->name('tasks.destroy');
+
+        Route::post('/tags', [TagApiController::class, 'store'])
+            ->name('tags.store');
+
+        Route::patch('/tags/{id}', [TagApiController::class, 'update'])
+            ->where('id', '[1-9][0-9]*')
+            ->name('tags.update');
+
+        Route::delete('/tags/{id}', [TagApiController::class, 'destroy'])
+            ->where('id', '[1-9][0-9]*')
+            ->name('tags.destroy');
     });
 
 Route::middleware([SanctumOrGuest::class])
