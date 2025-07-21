@@ -8,12 +8,6 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
-/**
- * Class CrudRepository.
- *
- * @author Andrii Prykhodko <andriichello@gmail.com>
- * @package Speedgoat\Skeleton\Repositories
- */
 abstract class CrudRepository extends BaseRepository implements
     CrudRepositoryInterface
 {

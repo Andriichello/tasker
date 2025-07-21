@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\CrudController;
+use App\Http\Requests\Crud\IndexRequest;
+use App\Http\Requests\Crud\ShowRequest;
 use App\Http\Resources\TaskResource;
 use App\Queries\TaskQuery;
 use App\Repositories\TaskRepository;
@@ -36,11 +38,11 @@ class TaskApiController extends CrudController
     /**
      * Returns a list of task records.
      *
-     * @param Request $request
+     * @param IndexRequest $request
      *
      * @return JsonResponse
      */
-    public function index(Request $request): JsonResponse
+    public function index(IndexRequest $request): JsonResponse
     {
         return $this->asResourceCollectionResponse(
             // index query conditions are already applied here
@@ -51,12 +53,12 @@ class TaskApiController extends CrudController
     /**
      * Returns a task record by id.
      *
-     * @param Request $request
+     * @param ShowRequest $request
      * @param int $id
      *
      * @return JsonResponse
      */
-    public function show(Request $request, int $id): JsonResponse
+    public function show(ShowRequest $request, int $id): JsonResponse
     {
         return $this->asResourceResponse(
             // index query conditions are already applied here
