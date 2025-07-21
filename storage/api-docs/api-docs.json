@@ -11,6 +11,97 @@
         }
     ],
     "paths": {
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Log in using email and password",
+                "operationId": "login",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Logged in successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                },
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "eyJ0eXAiOiJ..."
+                                                },
+                                                "user": {
+                                                    "$ref": "#/components/schemas/Me"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to log in."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/me": {
+            "get": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get currently logged-in user.",
+                "operationId": "me",
+                "responses": {
+                    "200": {
+                        "description": "Currently logged-in user has been returned.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MeResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/tasks": {
             "get": {
                 "tags": [
@@ -29,7 +120,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -59,7 +155,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/tasks/{id}": {
@@ -92,7 +193,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -123,7 +229,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "patch": {
                 "tags": [
@@ -165,7 +276,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/users": {
@@ -225,6 +341,23 @@
     },
     "components": {
         "schemas": {
+            "MeResponse": {
+                "description": "Currently logged-in user response object.",
+                "required": [
+                    "data",
+                    "message"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/Me"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "OK"
+                    }
+                },
+                "type": "object"
+            },
             "IndexTasksResponse": {
                 "description": "Index tasks response object.",
                 "required": [
@@ -348,6 +481,24 @@
                 },
                 "type": "object"
             },
+            "LoginRequest": {
+                "description": "Request for logging in with email and password.",
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "example": "example@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "example": "secret"
+                    }
+                },
+                "type": "object"
+            },
             "StoreTaskRequest": {
                 "description": "Request for creating a task record.",
                 "required": [
@@ -427,6 +578,48 @@
                 },
                 "type": "object"
             },
+            "Me": {
+                "description": "Me (User) resource object",
+                "required": [
+                    "id",
+                    "name",
+                    "email",
+                    "email_verified_at",
+                    "created_at",
+                    "updated_at"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Admin Admins"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "admin@email.com",
+                        "nullable": true
+                    },
+                    "email_verified_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "Task": {
                 "description": "Task resource object",
                 "required": [
@@ -483,8 +676,7 @@
                 "required": [
                     "id",
                     "name",
-                    "email",
-                    "email_verified_at"
+                    "email"
                 ],
                 "properties": {
                     "id": {
@@ -503,9 +695,19 @@
                 },
                 "type": "object"
             }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer"
+            }
         }
     },
     "tags": [
+        {
+            "name": "auth",
+            "description": "auth"
+        },
         {
             "name": "tasks",
             "description": "tasks"
