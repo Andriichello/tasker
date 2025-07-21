@@ -34,9 +34,7 @@ class TaskResource extends JsonResource
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
             // tags collection can be preloaded to avoid N+1 queries
-            // and can also be returned as a list of ids or names here,
-            // to make the response smaller
-            'tags' => TagResource::collection($this->tags),
+            'tags' => $this->tags->pluck('name')->all(),
         ];
     }
 
@@ -53,7 +51,7 @@ class TaskResource extends JsonResource
      *   @OA\Property(property="visibility", type="string", example="public"),
      *   @OA\Property(property="created_at", type="string", format="date-time", nullable=true),
      *   @OA\Property(property="updated_at", type="string", format="date-time", nullable=true),
-     *   @OA\Property(property="tags", type="array", @OA\Items(ref = "#/components/schemas/Tag")),
+     *   @OA\Property(property="tags", type="array", @OA\Items(type="string")),
      * )
      */
 }

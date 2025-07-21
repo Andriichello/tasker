@@ -85,6 +85,8 @@ class TaskApiController extends CrudController
         $user = $request->user();
         $attributes = $request->validated();
 
+        // Create the task with all attributes including tags
+        // The repository will handle tag synchronization internally
         $task = $this->repository->create([
             ...$attributes,
             // assign the task to the user that creates it
@@ -109,6 +111,10 @@ class TaskApiController extends CrudController
             ->findOrFail($id);
 
         $attributes = $request->validated();
+
+        // Update the task with all attributes including tags
+        // The repository will handle tag synchronization internally
+        // If tags are provided, they will be attached/detached as needed
         $this->repository->update($task, $attributes);
 
         return $this->asResourceResponse($task);

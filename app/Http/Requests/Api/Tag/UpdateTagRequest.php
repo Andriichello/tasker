@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api\Tag;
 
 use App\Http\Requests\Crud\UpdateRequest;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
@@ -22,6 +23,30 @@ class UpdateTagRequest extends UpdateRequest
         if (!$isLoggedIn) {
             $this->message = 'Log in to be able to update tags.';
             return false;
+        }
+
+        $name = $this->get('name');
+        $description = $this->get('description');
+
+        /** @var Tag|null $tag */
+        $tag = Tag::query()
+            ->find($this->route('id'));
+
+        if ($tag) {
+            $differs = (!is_null($name) && $tag->name !== $name)
+                || ($tag->description !== $description);
+
+            if ($differs) {
+                $shared = $tag->tasks()
+                    ->whereNot('user_id', $this->user()->id)
+                    ->exists();
+
+                if ($shared) {
+                    $this->message = 'You can only update tags' .
+                        ' that are not used by other users\' tasks.';
+                    return false;
+                }
+            }
         }
 
         return true;

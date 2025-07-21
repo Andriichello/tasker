@@ -59,6 +59,15 @@ class StoreTaskRequest extends StoreRequest
                 'min:1',
                 'max:4160',
             ],
+            'tags' => [
+                'sometimes',
+                'array',
+            ],
+            'tags.*' => [
+                'string',
+                'min:1',
+                'max:25',
+            ],
         ];
     }
 
@@ -73,7 +82,9 @@ class StoreTaskRequest extends StoreRequest
      *     enum={"public", "private"}),
      *   @OA\Property(property="title", type="string", example="Complete project documentation", description="Task title"),
      *   @OA\Property(property="description", type="string", example="Write comprehensive documentation for the project",
-     *     description="Task description", nullable=true)
+     *     description="Task description", nullable=true),
+     *   @OA\Property(property="tags", type="array", description="List of ALL the tag names that the task will have",
+     *     @OA\Items(type="string", example="important"))
      * )
      */
 }
