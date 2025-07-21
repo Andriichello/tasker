@@ -5,11 +5,12 @@ namespace Database\Seeders;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class DatabaseSeeder extends Seeder
 {
+    use WithoutModelEvents;
+
     /**
      * Seed the application's database.
      */
@@ -32,13 +33,19 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($users as $attributes) {
-            $user = User::factory()
-                ->create([...$attributes, 'password' => $password]);
+            $exists = User::query()
+                ->where('email', $attributes['email'])
+                ->exists();
 
-            Task::factory()
-                ->user($user)
-                ->count(rand(5, 10))
-                ->create();
+            if (!$exists) {
+                $user = User::factory()
+                    ->create([...$attributes, 'password' => $password]);
+
+                Task::factory()
+                    ->user($user)
+                    ->count(rand(5, 10))
+                    ->create();
+            }
         }
     }
 }
