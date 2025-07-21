@@ -6,7 +6,7 @@ use App\Queries\BaseQuery;
 use App\Repositories\CrudRepository;
 use Illuminate\Http\Request;
 
-abstract class CrudController
+abstract class CrudController extends ResourceController
 {
     /**
      * Controller model's CRUD repository.
@@ -25,6 +25,7 @@ abstract class CrudController
 
     /**
      * Get eloquent query builder instance.
+     * `Important: Will apply index query conditions.`
      *
      * @param Request $request
      *
