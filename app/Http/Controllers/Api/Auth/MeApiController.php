@@ -41,6 +41,7 @@ class MeApiController extends ResourceController
      *   path="/api/me",
      *   summary="Get currently logged-in user.",
      *   operationId="me",
+     *   security={{"bearerAuth": {}}},
      *   tags={"auth"},
      *
      *   @OA\Response(

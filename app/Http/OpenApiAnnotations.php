@@ -16,7 +16,13 @@ abstract class OpenApiAnnotations
      *     url="http://localhost:8000",
      *     description="Local server"
      *   )
-     * )
+     * ),
+     *
+     * @OA\SecurityScheme(
+     *    securityScheme="bearerAuth",
+     *    type="http",
+     *    scheme="bearer"
+     *  ),
      */
 
     /**

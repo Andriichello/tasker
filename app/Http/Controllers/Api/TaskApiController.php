@@ -141,6 +141,7 @@ class TaskApiController extends CrudController
      *   path="/api/tasks",
      *   summary="Index tasks.",
      *   operationId="indexTasks",
+     *   security={{"bearerAuth": {}}},
      *   tags={"tasks"},
      *
      *   @OA\Response(
@@ -154,6 +155,7 @@ class TaskApiController extends CrudController
      *   path="/api/tasks/{id}",
      *   summary="Show task by id.",
      *   operationId="showTask",
+     *   security={{"bearerAuth": {}}},
      *   tags={"tasks"},
      *
      *   @OA\Parameter(name="id", required=true, in="path", example=1, @OA\Schema(type="integer"),
@@ -170,6 +172,7 @@ class TaskApiController extends CrudController
      *   path="/api/tasks",
      *   summary="Store a task.",
      *   operationId="storeTask",
+     *   security={{"bearerAuth": {}}},
      *   tags={"tasks"},
      *
      *  @OA\RequestBody(
@@ -188,6 +191,7 @@ class TaskApiController extends CrudController
      *   path="/api/tasks/{id}",
      *   summary="Update a task.",
      *   operationId="updateTask",
+     *   security={{"bearerAuth": {}}},
      *   tags={"tasks"},
      *
      *   @OA\Parameter(name="id", required=true, in="path", example=1, @OA\Schema(type="integer"),
@@ -209,6 +213,7 @@ class TaskApiController extends CrudController
      *   path="/api/tasks/{id}",
      *   summary="Delete task.",
      *   operationId="destroyTask",
+     *   security={{"bearerAuth": {}}},
      *   tags={"tasks"},
      *
      *  @OA\Parameter(name="id", required=true, in="path", example=1, @OA\Schema(type="integer"),
