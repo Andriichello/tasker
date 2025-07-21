@@ -104,6 +104,7 @@ class TaskApiController extends CrudController
      */
     public function update(UpdateTaskRequest $request, int $id): JsonResponse
     {
+        // index query conditions are already applied here
         $task = $this->builder($request)
             ->findOrFail($id);
 
@@ -124,6 +125,7 @@ class TaskApiController extends CrudController
      */
     public function destroy(DestroyTaskRequest $request, int $id): JsonResponse
     {
+        // index query conditions are already applied here
         $task = $this->builder($request)
             ->findOrFail($id);
 
