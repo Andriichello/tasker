@@ -6,7 +6,7 @@
     },
     "servers": [
         {
-            "url": "http://localhost:8080",
+            "url": "http://localhost:8000",
             "description": "Local server"
         }
     ],
@@ -90,6 +90,178 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/MeResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/tags": {
+            "get": {
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Index tags.",
+                "operationId": "indexTags",
+                "responses": {
+                    "200": {
+                        "description": "Index tags response object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IndexTagsResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Store a tag.",
+                "operationId": "storeTag",
+                "requestBody": {
+                    "description": "Store tag request object.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreTagRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Store tag response object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StoreTagResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/tags/{id}": {
+            "get": {
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Show tag by id.",
+                "operationId": "showTag",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id of the tag.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Show tag response object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShowTagResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Delete tag.",
+                "operationId": "destroyTag",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id of the tag.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Delete tag response object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DestroyResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Update a tag.",
+                "operationId": "updateTag",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id of the tag.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "description": "Update tag request object.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateTagRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update tag response object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateTagResponse"
                                 }
                             }
                         }
@@ -358,6 +530,78 @@
                 },
                 "type": "object"
             },
+            "IndexTagsResponse": {
+                "description": "Index tags response object.",
+                "required": [
+                    "data",
+                    "meta",
+                    "message"
+                ],
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Tag"
+                        }
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "OK"
+                    }
+                },
+                "type": "object"
+            },
+            "ShowTagResponse": {
+                "description": "Show tag response object.",
+                "required": [
+                    "data",
+                    "message"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/Tag"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "OK"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreTagResponse": {
+                "description": "Store tag response object.",
+                "required": [
+                    "data",
+                    "message"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/Tag"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "OK"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateTagResponse": {
+                "description": "Update tag response object.",
+                "required": [
+                    "data",
+                    "message"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/Tag"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "OK"
+                    }
+                },
+                "type": "object"
+            },
             "IndexTasksResponse": {
                 "description": "Index tasks response object.",
                 "required": [
@@ -499,6 +743,43 @@
                 },
                 "type": "object"
             },
+            "StoreTagRequest": {
+                "description": "Request for creating a tag record.",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Tag name",
+                        "type": "string",
+                        "example": "Important"
+                    },
+                    "description": {
+                        "description": "Tag description",
+                        "type": "string",
+                        "example": "Tasks that need immediate attention",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateTagRequest": {
+                "description": "Request for updating a tag record.",
+                "properties": {
+                    "name": {
+                        "description": "Tag name",
+                        "type": "string",
+                        "example": "Important"
+                    },
+                    "description": {
+                        "description": "Tag description",
+                        "type": "string",
+                        "example": "Tasks that need immediate attention",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "StoreTaskRequest": {
                 "description": "Request for creating a task record.",
                 "required": [
@@ -620,6 +901,30 @@
                 },
                 "type": "object"
             },
+            "Tag": {
+                "description": "Tag resource object",
+                "required": [
+                    "id",
+                    "name",
+                    "description"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Important"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Tasks that need immediate attention",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "Task": {
                 "description": "Task resource object",
                 "required": [
@@ -667,6 +972,12 @@
                         "type": "string",
                         "format": "date-time",
                         "nullable": true
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Tag"
+                        }
                     }
                 },
                 "type": "object"
@@ -707,6 +1018,10 @@
         {
             "name": "auth",
             "description": "auth"
+        },
+        {
+            "name": "tags",
+            "description": "tags"
         },
         {
             "name": "tasks",
