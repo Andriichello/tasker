@@ -818,6 +818,14 @@
                         "type": "string",
                         "example": "Write comprehensive documentation for the project",
                         "nullable": true
+                    },
+                    "tags": {
+                        "description": "List of ALL the tag names that the task will have",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "important"
+                        }
                     }
                 },
                 "type": "object"
@@ -855,6 +863,14 @@
                         "type": "string",
                         "example": "Write comprehensive documentation for the project",
                         "nullable": true
+                    },
+                    "tags": {
+                        "description": "List of ALL the tag names that the task will have",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "important"
+                        }
                     }
                 },
                 "type": "object"
@@ -976,7 +992,7 @@
                     "tags": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/Tag"
+                            "type": "string"
                         }
                     }
                 },
