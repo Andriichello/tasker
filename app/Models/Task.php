@@ -4,10 +4,12 @@ namespace App\Models;
 
 use App\Enum\TaskStatus;
 use App\Enum\TaskVisibility;
+use App\Queries\TaskQuery;
 use Database\Factories\TaskFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Query\Builder as DatabaseBuilder;
 use Illuminate\Support\Carbon;
 
 /**
@@ -21,6 +23,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  *
  * @property User $user
+ *
+ * @method static TaskQuery query()
  */
 class Task extends Model
 {
@@ -61,5 +65,15 @@ class Task extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @param DatabaseBuilder $query
+     *
+     * @return TaskQuery
+     */
+    public function newEloquentBuilder($query): TaskQuery
+    {
+        return new TaskQuery($query);
     }
 }

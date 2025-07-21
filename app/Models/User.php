@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Queries\UserQuery;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder as DatabaseBuilder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -20,6 +22,8 @@ use Illuminate\Support\Collection;
  * @property Carbon|null $updated_at
  *
  * @property Collection|Task[] $tasks
+ *
+ * @method static UserQuery query()
  */
 class User extends Authenticatable
 {
@@ -69,5 +73,15 @@ class User extends Authenticatable
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    /**
+     * @param DatabaseBuilder $query
+     *
+     * @return UserQuery
+     */
+    public function newEloquentBuilder($query): UserQuery
+    {
+        return new UserQuery($query);
     }
 }
