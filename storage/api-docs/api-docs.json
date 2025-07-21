@@ -30,6 +30,36 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Store a task.",
+                "operationId": "storeTask",
+                "requestBody": {
+                    "description": "Store task request object.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreTaskRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Store task response object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StoreTaskResponse"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/tasks/{id}": {
@@ -58,6 +88,79 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ShowTaskResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Delete task.",
+                "operationId": "destroyTask",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id of the task.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Delete task response object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DestroyResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Update a task.",
+                "operationId": "updateTask",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id of the task.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "description": "Update task request object.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateTaskRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update task response object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateTaskResponse"
                                 }
                             }
                         }
@@ -160,6 +263,40 @@
                 },
                 "type": "object"
             },
+            "StoreTaskResponse": {
+                "description": "Store task response object.",
+                "required": [
+                    "data",
+                    "message"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/Task"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "OK"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateTaskResponse": {
+                "description": "Update task response object.",
+                "required": [
+                    "data",
+                    "message"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/Task"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "OK"
+                    }
+                },
+                "type": "object"
+            },
             "IndexUsersResponse": {
                 "description": "Index users response object.",
                 "required": [
@@ -194,6 +331,98 @@
                     "message": {
                         "type": "string",
                         "example": "OK"
+                    }
+                },
+                "type": "object"
+            },
+            "DestroyResponse": {
+                "description": "Delete response object.",
+                "required": [
+                    "message"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Deleted"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreTaskRequest": {
+                "description": "Request for creating a task record.",
+                "required": [
+                    "status",
+                    "visibility",
+                    "title"
+                ],
+                "properties": {
+                    "status": {
+                        "description": "Task status",
+                        "type": "string",
+                        "enum": [
+                            "to-do",
+                            "in-progress",
+                            "done",
+                            "canceled"
+                        ],
+                        "example": "to-do"
+                    },
+                    "visibility": {
+                        "description": "Task visibility",
+                        "type": "string",
+                        "enum": [
+                            "public",
+                            "private"
+                        ],
+                        "example": "public"
+                    },
+                    "title": {
+                        "description": "Task title",
+                        "type": "string",
+                        "example": "Complete project documentation"
+                    },
+                    "description": {
+                        "description": "Task description",
+                        "type": "string",
+                        "example": "Write comprehensive documentation for the project",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateTaskRequest": {
+                "description": "Request for updating a task record.",
+                "properties": {
+                    "status": {
+                        "description": "Task status",
+                        "type": "string",
+                        "enum": [
+                            "to-do",
+                            "in-progress",
+                            "done",
+                            "canceled"
+                        ],
+                        "example": "to-do"
+                    },
+                    "visibility": {
+                        "description": "Task visibility",
+                        "type": "string",
+                        "enum": [
+                            "public",
+                            "private"
+                        ],
+                        "example": "public"
+                    },
+                    "title": {
+                        "description": "Task title",
+                        "type": "string",
+                        "example": "Complete project documentation"
+                    },
+                    "description": {
+                        "description": "Task description",
+                        "type": "string",
+                        "example": "Write comprehensive documentation for the project",
+                        "nullable": true
                     }
                 },
                 "type": "object"
