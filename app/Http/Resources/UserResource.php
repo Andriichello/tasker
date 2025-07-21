@@ -33,7 +33,7 @@ class UserResource extends JsonResource
      * @OA\Schema(
      *   schema="User",
      *   description="User resource object",
-     *   required = {"id", "name", "email", "email_verified_at"},
+     *   required = {"id", "name", "email"},
      *   @OA\Property(property="id", type="integer", example=1),
      *   @OA\Property(property="name", type="string", example="Admin Admins"),
      *   @OA\Property(property="email", type="string", example="admin@email.com", nullable=true),
