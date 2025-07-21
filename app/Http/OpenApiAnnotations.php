@@ -13,7 +13,7 @@ abstract class OpenApiAnnotations
     /**
      * @OA\Info(title="tasker", version="0.1"),
      *   @OA\Server(
-     *     url="http://localhost:8000",
+     *     url=L5_SWAGGER_CONST_HOST,
      *     description="Local server"
      *   )
      * ),
