@@ -3,11 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\CrudController;
+use App\Http\Requests\Api\Task\DestroyTaskRequest;
+use App\Http\Requests\Api\Task\StoreTaskRequest;
+use App\Http\Requests\Api\Task\UpdateTaskRequest;
 use App\Http\Requests\Crud\IndexRequest;
 use App\Http\Requests\Crud\ShowRequest;
 use App\Http\Resources\TaskResource;
+use App\Models\User;
 use App\Queries\TaskQuery;
 use App\Repositories\TaskRepository;
+use HttpException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -68,6 +73,68 @@ class TaskApiController extends CrudController
     }
 
     /**
+     * Stores a task record in the database.
+     *
+     * @param StoreTaskRequest $request
+     *
+     * @return JsonResponse
+     */
+    public function store(StoreTaskRequest $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $attributes = $request->validated();
+
+        $task = $this->repository->create([
+            ...$attributes,
+            // assign the task to the user that creates it
+            'user_id' => $user->id,
+        ]);
+
+        return $this->asResourceResponse($task);
+    }
+
+    /**
+     * Updates a task record in the database by id.
+     *
+     * @param UpdateTaskRequest $request
+     * @param int $id
+     *
+     * @return JsonResponse
+     */
+    public function update(UpdateTaskRequest $request, int $id): JsonResponse
+    {
+        $task = $this->builder($request)
+            ->findOrFail($id);
+
+        $attributes = $request->validated();
+        $this->repository->update($task, $attributes);
+
+        return $this->asResourceResponse($task);
+    }
+
+    /**
+     * Updates a task record in the database by id.
+     *
+     * @param DestroyTaskRequest $request
+     * @param int $id
+     *
+     * @return JsonResponse
+     * @throws HttpException
+     */
+    public function destroy(DestroyTaskRequest $request, int $id): JsonResponse
+    {
+        $task = $this->builder($request)
+            ->findOrFail($id);
+
+        if (!$this->repository->delete($task)) {
+            throw new HttpException('Failed to delete the task.');
+        }
+
+        return new JsonResponse(['message' => 'Deleted']);
+    }
+
+    /**
      * @OA\Get(
      *   path="/api/tasks",
      *   summary="Index tasks.",
@@ -96,6 +163,61 @@ class TaskApiController extends CrudController
      *     @OA\JsonContent(ref="#/components/schemas/ShowTaskResponse")
      *   ),
      * )
+     *
+     * @OA\Post(
+     *   path="/api/tasks",
+     *   summary="Store a task.",
+     *   operationId="storeTask",
+     *   tags={"tasks"},
+     *
+     *  @OA\RequestBody(
+     *     required=true,
+     *     description="Store task request object.",
+     *     @OA\JsonContent(ref ="#/components/schemas/StoreTaskRequest")
+     *   ),
+     *   @OA\Response(
+     *     response=201,
+     *     description="Store task response object.",
+     *     @OA\JsonContent(ref ="#/components/schemas/StoreTaskResponse")
+     *   ),
+     * )
+     *
+     * @OA\Patch(
+     *   path="/api/tasks/{id}",
+     *   summary="Update a task.",
+     *   operationId="updateTask",
+     *   tags={"tasks"},
+     *
+     *   @OA\Parameter(name="id", required=true, in="path", example=1, @OA\Schema(type="integer"),
+     *   description="Id of the task."),
+     *
+     *  @OA\RequestBody(
+     *     required=true,
+     *     description="Update task request object.",
+     *     @OA\JsonContent(ref ="#/components/schemas/UpdateTaskRequest")
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Update task response object.",
+     *     @OA\JsonContent(ref ="#/components/schemas/UpdateTaskResponse")
+     *   ),
+     * )
+     *
+     * @OA\Delete(
+     *   path="/api/tasks/{id}",
+     *   summary="Delete task.",
+     *   operationId="destroyTask",
+     *   tags={"tasks"},
+     *
+     *  @OA\Parameter(name="id", required=true, in="path", example=1, @OA\Schema(type="integer"),
+     *     description="Id of the task."),
+     *
+     *   @OA\Response(
+     *     response=200,
+     *     description="Delete task response object.",
+     *     @OA\JsonContent(ref ="#/components/schemas/DestroyResponse")
+     *   ),
+     * ),
      */
 
     /**
@@ -110,6 +232,22 @@ class TaskApiController extends CrudController
      * @OA\Schema(
      *   schema="ShowTaskResponse",
      *   description="Show task response object.",
+     *   required = {"data", "message"},
+     *   @OA\Property(property="data", ref="#/components/schemas/Task"),
+     *   @OA\Property(property="message", type="string", example="OK"),
+     * )
+     *
+     * @OA\Schema(
+     *   schema="StoreTaskResponse",
+     *   description="Store task response object.",
+     *   required = {"data", "message"},
+     *   @OA\Property(property="data", ref="#/components/schemas/Task"),
+     *   @OA\Property(property="message", type="string", example="OK"),
+     * )
+     *
+      * @OA\Schema(
+     *   schema="UpdateTaskResponse",
+     *   description="Update task response object.",
      *   required = {"data", "message"},
      *   @OA\Property(property="data", ref="#/components/schemas/Task"),
      *   @OA\Property(property="message", type="string", example="OK"),

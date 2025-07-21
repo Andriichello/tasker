@@ -25,4 +25,15 @@ Route::get('/tasks/{id}', [TaskApiController::class, 'show'])
     ->where('id', '[1-9][0-9]*')
     ->name('tasks.show');
 
+Route::post('/tasks', [TaskApiController::class, 'store'])
+    ->name('tasks.store');
+
+Route::patch('/tasks/{id}', [TaskApiController::class, 'update'])
+    ->where('id', '[1-9][0-9]*')
+    ->name('tasks.update');
+
+Route::delete('/tasks/{id}', [TaskApiController::class, 'destroy'])
+    ->where('id', '[1-9][0-9]*')
+    ->name('tasks.destroy');
+
 

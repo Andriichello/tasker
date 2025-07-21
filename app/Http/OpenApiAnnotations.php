@@ -18,4 +18,13 @@ abstract class OpenApiAnnotations
      *   )
      * )
      */
+
+    /**
+     * @OA\Schema(
+     *   schema="DestroyResponse",
+     *   description="Delete response object.",
+     *   required = {"message"},
+     *   @OA\Property(property="message", type="string", example="Deleted"),
+     * ),
+     */
 }
