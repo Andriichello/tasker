@@ -8,13 +8,49 @@
           Tasks with blue border are yours
         </p>
       </div>
-      <button
-        v-if="isAuthenticated"
-        @click="createTask"
-        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-      >
-        Create Task
-      </button>
+      <div>
+        <button
+          v-if="isAuthenticated"
+          @click="createTask"
+          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Create Task
+        </button>
+      </div>
+    </div>
+
+    <!-- Centered Search Bar -->
+    <div class="flex justify-between mb-6">
+      <div class="flex items-center w-full max-w-md">
+        <input
+          type="text"
+          v-model="searchQuery"
+          @keyup.enter="handleSearch"
+          placeholder="Search tasks..."
+          class="border border-gray-300 rounded-l px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          @click="handleSearch"
+          class="bg-blue-500 text-white p-2 rounded-r hover:bg-blue-600 flex items-center justify-center"
+          style="aspect-ratio: 1/1;"
+        >
+          <Search size="20" />
+        </button>
+      </div>
+
+      <div class="flex items-center ml-4">
+        <select
+          id="statusFilter"
+          v-model="statusFilter"
+          class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">All Statuses</option>
+          <option value="to-do">To Do</option>
+          <option value="in-progress">In Progress</option>
+          <option value="canceled">Canceled</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
     </div>
 
     <!-- Loading state -->
@@ -123,7 +159,7 @@
                 <span
                   v-for="tag in task.tags"
                   :key="tag"
-                  class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded"
+                  class="bg-gray-700 text-white text-xs px-2 py-1 rounded"
                 >
                   {{ tag }}
                 </span>
@@ -140,6 +176,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore, useTasksStore } from '../stores';
 import type { Task } from '../api/models/task';
+import { Search } from 'lucide-vue-next';
 
 // Get stores
 const authStore = useAuthStore();
@@ -147,6 +184,10 @@ const tasksStore = useTasksStore();
 
 // State
 const activeTab = ref<'all' | 'public' | 'private' | 'my'>('all');
+const searchQuery = ref('');
+const statusFilter = ref('');
+const lastSearchTime = ref(0);
+const debounceTime = 500;
 
 // Computed properties
 const isAuthenticated = computed(() => authStore.isAuthenticated);
@@ -168,29 +209,59 @@ const myTasks = computed(() => {
   return tasks.value.filter((task: Task) => task.user_id === authStore.user?.id);
 });
 
-// Computed property for displayed tasks based on active tab
+// Computed property for displayed tasks based on active tab and status filter
 const displayedTasks = computed(() => {
+  // First, filter by active tab
+  let filteredTasks;
   switch (activeTab.value) {
     case 'all':
-      return tasks.value;
+      filteredTasks = tasks.value;
+      break;
     case 'public':
-      return publicTasks.value;
+      filteredTasks = publicTasks.value;
+      break;
     case 'private':
-      return privateTasks.value;
+      filteredTasks = privateTasks.value;
+      break;
     case 'my':
-      return myTasks.value;
+      filteredTasks = myTasks.value;
+      break;
     default:
-      return tasks.value;
+      filteredTasks = tasks.value;
   }
+
+  // Then, filter by status if a status filter is selected
+  if (statusFilter.value) {
+    return filteredTasks.filter((task: Task) => task.status === statusFilter.value);
+  }
+
+  return filteredTasks;
 });
 
 // Fetch tasks from store
-const fetchTasks = async () => {
+const fetchTasks = async (search?: string) => {
   // First check if user is authenticated
   await authStore.getMe();
 
   // Fetch tasks using the store
-  await tasksStore.fetchTasks();
+  await tasksStore.fetchTasks(search);
+};
+
+// Handle search with debounce
+const handleSearch = () => {
+  const currentTime = Date.now();
+  const timeSinceLastSearch = currentTime - lastSearchTime.value;
+
+  // Only perform search if debounce time has passed
+  if (timeSinceLastSearch >= debounceTime) {
+    // Don't send empty search queries
+    const searchTerm = searchQuery.value.trim() || undefined;
+    fetchTasks(searchTerm);
+    lastSearchTime.value = currentTime;
+  } else {
+    // If debounce time hasn't passed, show a message or visual feedback
+    console.log(`Please wait ${Math.ceil((debounceTime - timeSinceLastSearch) / 1000)} seconds before searching again`);
+  }
 };
 
 // Truncate description to 100 characters

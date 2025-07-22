@@ -27,12 +27,13 @@ export const useTasksStore = defineStore('tasks', {
   },
 
   actions: {
-    async fetchTasks() {
+    async fetchTasks(search?: string) {
       this.loading = true;
       this.error = null;
 
       try {
-        const response = await indexTasks();
+        const options = search ? { params: { search } } : undefined;
+        const response = await indexTasks(options);
         this.tasks = response.data.data || [];
         return this.tasks;
       } catch (error) {
