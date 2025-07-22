@@ -20,6 +20,8 @@ export const useAuthStore = defineStore('auth', {
         const response = await login(credentials);
         const { token, user } = response.data.data || {};
 
+        console.log('token:', token);
+
         if (token) {
           this.token = token;
           this.me = user || null;

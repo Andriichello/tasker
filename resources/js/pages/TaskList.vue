@@ -34,7 +34,7 @@
           @click="togglePrivateCollapse"
           class="bg-purple-100 p-4 flex justify-between items-center cursor-pointer hover:bg-purple-200"
         >
-          <h2 class="text-xl font-semibold text-purple-800">Private Tasks ({{ privateTasks.length }})</h2>
+          <h2 class="text-xl font-semibold text-purple-800">Private ({{ privateTasks.length }})</h2>
           <ChevronDown
             class="h-5 w-5 text-purple-800 transition-transform"
             :class="{ 'rotate-180': !privateCollapsed }"

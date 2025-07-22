@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [WebController::class, 'view'])
     ->name('landing');
 
+Route::get('/login', [WebController::class, 'view'])
+    ->name('login');
+
 // Task routes - all handled by the same view for SPA
 Route::get('/create', [WebController::class, 'view'])
     ->name('task.create');

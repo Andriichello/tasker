@@ -13,7 +13,9 @@
           <ChevronDown class="h-5 w-5" />
         </div>
         <div v-else>
-          <a href="/login" class="hover:text-blue-200">Login</a>
+          <a href="/login" class="hover:text-blue-200" v-if="!isLogin">
+            Login
+          </a>
         </div>
 
         <!-- Dropdown Menu -->
@@ -44,8 +46,10 @@ const authStore = useAuthStore();
 const showDropdown = ref<boolean>(false);
 
 // Computed properties
+const isLogin = computed(() => window.location.pathname === '/login');
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 const user = computed(() => authStore.user || {} as Me);
+
 
 // Toggle dropdown menu
 const toggleDropdown = () => {
