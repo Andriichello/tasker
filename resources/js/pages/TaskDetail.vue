@@ -47,7 +47,7 @@
         <div class="flex space-x-2">
           <span
             :class="[
-              'text-sm px-3 py-1 rounded-full',
+              'whitespace-nowrap text-sm px-3 py-1 rounded-full',
               task.status === 'to-do' ? 'bg-yellow-100 text-yellow-800' :
               task.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
               task.status === 'done' ? 'bg-green-100 text-green-800' :
@@ -64,19 +64,20 @@
         <p class="text-gray-700 whitespace-pre-line">{{ task.description || 'No description provided.' }}</p>
       </div>
 
-      <!-- Task tags -->
-      <div class="mb-6" v-if="task.tags && task.tags.length > 0">
-        <div class="flex flex-wrap gap-2">
-          <span
-            v-for="tag in task.tags"
-            :key="tag"
-            class="bg-gray-100 text-gray-700 px-3 py-1 rounded"
-          >
-            {{ tag }}
-          </span>
-          <span v-if="!task.tags || task.tags.length === 0" class="text-gray-500">
-            No tags
-          </span>
+      <div class="flex justify-between items-end mt-2">
+        <!-- User name in the down left corner -->
+        <div class="text-sm font-semibold" v-if="task.user">
+          {{ task.user.name }}
+        </div>
+        <!-- Tags in the right down corner -->
+        <div class="flex flex-wrap gap-1 justify-end">
+                <span
+                  v-for="tag in task.tags"
+                  :key="tag"
+                  class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded"
+                >
+                  {{ tag }}
+                </span>
         </div>
       </div>
 
@@ -91,21 +92,6 @@
             Delete Task
           </button>
         </template>
-
-        <!-- Status change buttons for task owner -->
-        <div v-if="isAuthenticated && currentUser && currentUser.id === task.user_id" class="ml-auto">
-          <select
-            v-model="newStatus"
-            @change="updateStatus"
-            class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option disabled value="">Change Status</option>
-            <option value="to-do">To Do</option>
-            <option value="in-progress">In Progress</option>
-            <option value="done">Done</option>
-            <option value="canceled">Canceled</option>
-          </select>
-        </div>
       </div>
 
       <!-- Delete confirmation modal -->

@@ -4,6 +4,7 @@
  * tasker
  * OpenAPI spec version: 0.1
  */
+import type { User } from "./user";
 
 /**
  * Task resource object
@@ -21,4 +22,5 @@ export interface Task {
   /** @nullable */
   updated_at: string | null;
   tags?: string[];
+  user: User;
 }

@@ -81,6 +81,7 @@ class TaskApiController extends CrudController
         return $this->asResourceResponse(
             // index query conditions are already applied here
             $this->builder($request)
+                ->with('user')
                 ->findOrFail($id)
         );
     }
