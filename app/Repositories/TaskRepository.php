@@ -4,7 +4,9 @@ namespace App\Repositories;
 
 use App\Models\Tag;
 use App\Models\Task;
+use App\Queries\BaseQuery;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 class TaskRepository extends CrudRepository
 {
@@ -14,6 +16,30 @@ class TaskRepository extends CrudRepository
      * @var class-string<Model>
      */
     protected string $model = Task::class;
+
+    public function builder(?Request $request = null): BaseQuery
+    {
+        $builder = parent::builder($request);
+
+        if ($request) {
+            $builder = $builder->index($request);
+
+            $tag = $request->query('tag');
+            if (isset($tag) && is_string($tag)) {
+                $builder->join('tag_task', 'tasks.id', '=', 'tag_task.task_id')
+                    ->join('tags', 'tags.id', '=', 'tag_task.tag_id')
+                    ->where('tags.name', $tag)
+                    ->select('tasks.*');
+            }
+
+            $status = $request->query('status');
+            if (isset($status) && is_string($status)) {
+                $builder->where('status', $status);
+            }
+        }
+
+        return $builder;
+    }
 
     /**
      * Create a task with given attributes and sync tags.
