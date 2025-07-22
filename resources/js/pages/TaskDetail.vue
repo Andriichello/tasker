@@ -74,7 +74,7 @@
                 <span
                   v-for="tag in task.tags"
                   :key="tag"
-                  class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded"
+                  class="bg-gray-700 text-white text-xs px-2 py-1 rounded"
                 >
                   {{ tag }}
                 </span>

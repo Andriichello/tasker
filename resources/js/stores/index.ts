@@ -2,3 +2,4 @@
 export { useAuthStore } from './auth';
 export { useTasksStore } from './tasks';
 export { useUsersStore } from './users';
+export { useTagsStore } from './tags';

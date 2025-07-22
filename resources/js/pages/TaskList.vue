@@ -19,8 +19,45 @@
       </div>
     </div>
 
+    <!-- Filters Row -->
+    <div class="flex flex-wrap justify-start gap-4 mb-6">
+      <!-- Status Filter -->
+      <div class="w-64">
+        <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+        <Multiselect
+          id="statusFilter"
+          v-model="statusFilter"
+          :options="statusOptions"
+          :searchable="true"
+          :close-on-select="true"
+          :create-option="false"
+          mode="single"
+          placeholder="All Statuses"
+          class="border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          @update:model-value="handleSearch"
+        />
+      </div>
+
+      <!-- Tag Filter -->
+      <div class="w-64">
+        <label for="tagFilter" class="block text-sm font-medium text-gray-700 mb-1">Tag</label>
+        <Multiselect
+          id="tagFilter"
+          v-model="tagFilter"
+          :options="availableTags"
+          :searchable="true"
+          :close-on-select="true"
+          :create-option="false"
+          mode="single"
+          placeholder="All Tags"
+          class="border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          @update:model-value="handleSearch"
+        />
+      </div>
+    </div>
+
     <!-- Centered Search Bar -->
-    <div class="flex justify-between mb-6">
+    <div class="flex justify-start mb-4">
       <div class="flex items-center w-full max-w-md">
         <input
           type="text"
@@ -31,25 +68,11 @@
         />
         <button
           @click="handleSearch"
-          class="bg-blue-500 text-white p-2 rounded-r hover:bg-blue-600 flex items-center justify-center"
+          class="bg-blue-500 text-white p-[11px] rounded-r hover:bg-blue-600 flex items-center justify-center"
           style="aspect-ratio: 1/1;"
         >
           <Search size="20" />
         </button>
-      </div>
-
-      <div class="flex items-center ml-4">
-        <select
-          id="statusFilter"
-          v-model="statusFilter"
-          class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">All Statuses</option>
-          <option value="to-do">To Do</option>
-          <option value="in-progress">In Progress</option>
-          <option value="canceled">Canceled</option>
-          <option value="done">Done</option>
-        </select>
       </div>
     </div>
 
@@ -174,20 +197,41 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useAuthStore, useTasksStore } from '../stores';
+import { useAuthStore, useTasksStore, useTagsStore } from '../stores';
 import type { Task } from '../api/models/task';
 import { Search } from 'lucide-vue-next';
+import Multiselect from '@vueform/multiselect';
+import '@vueform/multiselect/themes/default.css';
 
 // Get stores
 const authStore = useAuthStore();
 const tasksStore = useTasksStore();
+const tagsStore = useTagsStore();
 
 // State
 const activeTab = ref<'all' | 'public' | 'private' | 'my'>('all');
 const searchQuery = ref('');
-const statusFilter = ref('');
+const statusFilter = ref(null);
+const tagFilter = ref(null);
 const lastSearchTime = ref(0);
 const debounceTime = 500;
+
+// Status options for the status filter
+const statusOptions = [
+  { value: 'to-do', label: 'To Do' },
+  { value: 'in-progress', label: 'In Progress' },
+  { value: 'canceled', label: 'Canceled' },
+  { value: 'done', label: 'Done' }
+];
+
+// Get tags from the tags store for the tag filter dropdown
+const availableTags = computed(() => {
+  // Format tags for Multiselect component
+  return [
+    { value: '', label: 'All Tags' },
+    ...tagsStore.getTags.map(tag => ({ value: tag.name, label: tag.name }))
+  ];
+});
 
 // Computed properties
 const isAuthenticated = computed(() => authStore.isAuthenticated);
@@ -209,7 +253,7 @@ const myTasks = computed(() => {
   return tasks.value.filter((task: Task) => task.user_id === authStore.user?.id);
 });
 
-// Computed property for displayed tasks based on active tab and status filter
+// Computed property for displayed tasks based on active tab, status filter, and tag filter
 const displayedTasks = computed(() => {
   // First, filter by active tab
   let filteredTasks;
@@ -232,19 +276,40 @@ const displayedTasks = computed(() => {
 
   // Then, filter by status if a status filter is selected
   if (statusFilter.value) {
-    return filteredTasks.filter((task: Task) => task.status === statusFilter.value);
+    // Handle both string and object formats for statusFilter
+    const statusValue = typeof statusFilter.value === 'object' && statusFilter.value !== null
+      ? statusFilter.value.value
+      : statusFilter.value;
+
+    if (statusValue) {
+      filteredTasks = filteredTasks.filter((task: Task) => task.status === statusValue);
+    }
+  }
+
+  // Finally, filter by tag if a tag filter is selected
+  if (tagFilter.value) {
+    // Handle both string and object formats for tagFilter
+    const tagValue = typeof tagFilter.value === 'object' && tagFilter.value !== null
+      ? tagFilter.value.value || tagFilter.value
+      : tagFilter.value;
+
+    filteredTasks = filteredTasks.filter((task: Task) => {
+      if (!task.tags || !Array.isArray(task.tags)) return false;
+      // Check if task has the selected tag
+      return task.tags.includes(tagValue);
+    });
   }
 
   return filteredTasks;
 });
 
 // Fetch tasks from store
-const fetchTasks = async (search?: string) => {
+const fetchTasks = async (search?: string, status?: string, tag?: string) => {
   // First check if user is authenticated
   await authStore.getMe();
 
-  // Fetch tasks using the store
-  await tasksStore.fetchTasks(search);
+  // Fetch tasks using the store with server-side filtering
+  await tasksStore.fetchTasks(search, status, tag);
 };
 
 // Handle search with debounce
@@ -256,7 +321,23 @@ const handleSearch = () => {
   if (timeSinceLastSearch >= debounceTime) {
     // Don't send empty search queries
     const searchTerm = searchQuery.value.trim() || undefined;
-    fetchTasks(searchTerm);
+
+    // Get status filter value
+    const statusValue = statusFilter.value ?
+      (typeof statusFilter.value === 'object' && statusFilter.value !== null ?
+        statusFilter.value.value :
+        statusFilter.value) :
+      undefined;
+
+    // Get tag filter value
+    const tagValue = tagFilter.value ?
+      (typeof tagFilter.value === 'object' && tagFilter.value !== null ?
+        tagFilter.value.value :
+        tagFilter.value) :
+      undefined;
+
+    // Send all filters to the backend
+    fetchTasks(searchTerm, statusValue, tagValue);
     lastSearchTime.value = currentTime;
   } else {
     // If debounce time hasn't passed, show a message or visual feedback
@@ -282,9 +363,13 @@ const createTask = (): void => {
   window.location.href = '/create';
 };
 
-// Fetch tasks on component mount
-onMounted(() => {
+// Fetch tasks and tags on component mount
+onMounted(async () => {
+  // Initial fetch without filters
   fetchTasks();
+
+  // Fetch all available tags
+  await tagsStore.fetchTags();
 
   // Set default tab based on authentication status
   if (!isAuthenticated.value) {
