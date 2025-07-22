@@ -35,6 +35,7 @@ class TaskResource extends JsonResource
             'updated_at' => $this->updated_at?->toIso8601String(),
             // tags collection can be preloaded to avoid N+1 queries
             'tags' => $this->tags->pluck('name')->all(),
+            'user' => $this->whenLoaded('user', fn() => new UserResource($this->user)),
         ];
     }
 
@@ -42,7 +43,7 @@ class TaskResource extends JsonResource
      * @OA\Schema(
      *   schema="Task",
      *   description="Task resource object",
-     *   required = {"id", "user_id", "status", "title", "description", "visibility", "created_at", "updated_at"},
+     *   required = {"id", "user_id", "status", "title", "description", "visibility", "created_at", "updated_at", "user"},
      *   @OA\Property(property="id", type="integer", example=1),
      *   @OA\Property(property="user_id", type="integer", example=1),
      *   @OA\Property(property="status", type="string", example="pending"),
@@ -52,6 +53,7 @@ class TaskResource extends JsonResource
      *   @OA\Property(property="created_at", type="string", format="date-time", nullable=true),
      *   @OA\Property(property="updated_at", type="string", format="date-time", nullable=true),
      *   @OA\Property(property="tags", type="array", @OA\Items(type="string")),
+     *   @OA\Property(property="user", nullable="true", ref ="#/components/schemas/User"),
      * )
      */
 }

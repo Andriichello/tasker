@@ -9,6 +9,7 @@ use App\Http\Requests\Api\Task\UpdateTaskRequest;
 use App\Http\Requests\Crud\IndexRequest;
 use App\Http\Requests\Crud\ShowRequest;
 use App\Http\Resources\TaskResource;
+use App\Models\Task;
 use App\Models\User;
 use App\Queries\TaskQuery;
 use App\Repositories\TaskRepository;
@@ -16,6 +17,7 @@ use HttpException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 use OpenApi\Annotations as OA;
 
 /**
@@ -49,10 +51,21 @@ class TaskApiController extends CrudController
      */
     public function index(IndexRequest $request): JsonResponse
     {
-        return $this->asResourceCollectionResponse(
-            // index query conditions are already applied here
-            $this->builder($request)->get()
-        );
+        /** @var Collection<int, Task> $tasks */
+        $tasks = $this->builder($request) // index query conditions are already applied here
+            ->orderByDesc('updated_at')
+            ->get();
+
+        /** @var Collection<int, User> $users */
+        $users = User::query()
+            ->whereIn('id', $tasks->pluck('user_id'))
+            ->get();
+
+        $tasks->each(function (Task $task) use ($users) {
+            $task->setRelation('user', $users->firstWhere('id', $task->user_id));
+        });
+
+        return $this->asResourceCollectionResponse($tasks);
     }
 
     /**
