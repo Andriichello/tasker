@@ -951,7 +951,8 @@
                     "description",
                     "visibility",
                     "created_at",
-                    "updated_at"
+                    "updated_at",
+                    "user"
                 ],
                 "properties": {
                     "id": {
@@ -994,6 +995,9 @@
                         "items": {
                             "type": "string"
                         }
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/User"
                     }
                 },
                 "type": "object"
