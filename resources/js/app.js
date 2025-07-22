@@ -11,6 +11,19 @@ import { authMiddleware } from './middleware';
 // Create Pinia
 const pinia = createPinia();
 
+// Add a plugin to persist state changes to localStorage
+pinia.use(({ store }) => {
+  // Restore state from localStorage when store is initialized
+  const persistedState = localStorage.getItem(`pinia-${store.$id}`);
+  if (persistedState) {
+    try {
+      store.$patch(JSON.parse(persistedState));
+    } catch (error) {
+      console.error(`Error restoring state for ${store.$id}:`, error);
+    }
+  }
+});
+
 // Create the Vue app
 const app = createApp({
   data() {

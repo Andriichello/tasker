@@ -18,7 +18,7 @@ return new class extends Migration
             // status: to-do, in-progress, done, canceled
             $table->string('status', 25);
             $table->string('title');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->string('visibility', 10);
             $table->timestamps();
 

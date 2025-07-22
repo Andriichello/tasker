@@ -146,8 +146,10 @@ const error = computed(() => tasksStore.getError);
 
 // Fetch task details
 const fetchTask = async () => {
-  // First check if user is authenticated
-  await authStore.getMe();
+  // First check if user is authenticated, but don't wait for it if we already have user data
+  if (!authStore.user) {
+    await authStore.getMe();
+  }
 
   // Fetch task details
   const fetchedTask = await tasksStore.fetchTask(taskId);
