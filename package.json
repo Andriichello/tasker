@@ -20,7 +20,9 @@
     "dependencies": {
         "@vitejs/plugin-vue": "^6.0.0",
         "lucide-vue-next": "^0.525.0",
+        "orval": "^7.10.0",
         "pinia": "^3.0.3",
+        "prettier": "^3.6.2",
         "vue": "^3.5.17"
     }
 }

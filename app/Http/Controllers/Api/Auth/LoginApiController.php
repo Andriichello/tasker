@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Http\Controllers\ResourceController;
 use App\Http\Requests\Api\Auth\LoginRequest;
 use App\Http\Resources\MeResource;
-use App\Http\Responses\ApiResponse;
-use App\Models\AccessToken;
 use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\SessionGuard;
