@@ -26,7 +26,7 @@ class StoreTaskRequest extends StoreRequest
             return false;
         }
 
-        return false;
+        return true;
     }
 
     /**

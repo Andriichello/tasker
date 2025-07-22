@@ -23,7 +23,7 @@ abstract class CrudRepository extends BaseRepository implements
     public function builder(?Request $request = null): BaseQuery
     {
         return parent::builder()
-            ->index($request);
+            ->when($request, fn(BaseQuery $query) => $query->index($request));
     }
 
     /**

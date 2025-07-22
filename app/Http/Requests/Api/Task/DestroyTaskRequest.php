@@ -41,37 +41,4 @@ class DestroyTaskRequest extends DestroyRequest
 
         return true;
     }
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array|string>
-     */
-    public function rules(): array
-    {
-        return [
-            'status' => [
-                'required',
-                'string',
-                Rule::in(TaskStatus::cases()),
-            ],
-            'visibility' => [
-                'required',
-                'string',
-                Rule::in(TaskVisibility::cases()),
-            ],
-            'title' => [
-                'required',
-                'string',
-                'min:1',
-                'max:255',
-            ],
-            'description' => [
-                'sometimes',
-                'nullable',
-                'min:1',
-                'max:4160',
-            ],
-        ];
-    }
 }
