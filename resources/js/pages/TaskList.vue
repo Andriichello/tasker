@@ -127,26 +127,33 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
 import { ChevronDown } from 'lucide-vue-next';
+import { useAuthStore, useTasksStore } from '../stores';
+import type { Task } from '../api/models/task';
+
+// Get stores
+const authStore = useAuthStore();
+const tasksStore = useTasksStore();
 
 // State
-const tasks = ref([]);
-const loading = ref(true);
-const error = ref(null);
-const isAuthenticated = ref(false);
 const privateCollapsed = ref(false);
 const publicCollapsed = ref(false);
 
+// Computed properties
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+const tasks = computed(() => tasksStore.getTasks);
+const loading = computed(() => tasksStore.isLoading);
+const error = computed(() => tasksStore.getError);
+
 // Computed properties for filtered tasks
 const privateTasks = computed(() => {
-  return tasks.value.filter(task => task.visibility === 'private');
+  return tasks.value.filter((task: Task) => task.visibility === 'private');
 });
 
 const publicTasks = computed(() => {
-  return tasks.value.filter(task => task.visibility === 'public');
+  return tasks.value.filter((task: Task) => task.visibility === 'public');
 });
 
 // Toggle collapse state
@@ -158,51 +165,17 @@ const togglePublicCollapse = () => {
   publicCollapsed.value = !publicCollapsed.value;
 };
 
-// Check if user is authenticated
-const checkAuth = async () => {
-  try {
-    const response = await axios.get('/api/me');
-    isAuthenticated.value = true;
-    return response.data.data;
-  } catch (err) {
-    isAuthenticated.value = false;
-    return null;
-  }
-};
-
-// Fetch tasks from API
+// Fetch tasks from store
 const fetchTasks = async () => {
-  loading.value = true;
-  error.value = null;
+  // First check if user is authenticated
+  await authStore.getMe();
 
-  try {
-    // First check if user is authenticated
-    await checkAuth();
-
-    // Fetch tasks
-    const response = await axios.get('/api/tasks');
-    tasks.value = response.data.data;
-  } catch (err) {
-    console.error('Error fetching tasks:', err);
-
-    // If unauthorized, try to fetch public tasks only
-    if (err.response && err.response.status === 401) {
-      try {
-        const publicResponse = await axios.get('/api/tasks?visibility=public');
-        tasks.value = publicResponse.data.data;
-      } catch (publicErr) {
-        error.value = 'Failed to load tasks. Please try again later.';
-      }
-    } else {
-      error.value = 'Failed to load tasks. Please try again later.';
-    }
-  } finally {
-    loading.value = false;
-  }
+  // Fetch tasks using the store
+  await tasksStore.fetchTasks();
 };
 
 // Truncate description to 100 characters
-const truncateDescription = (description) => {
+const truncateDescription = (description: string | null): string => {
   if (!description) return '';
   return description.length > 100
     ? description.substring(0, 100) + '...'
@@ -210,12 +183,12 @@ const truncateDescription = (description) => {
 };
 
 // Navigate to task detail page
-const viewTask = (taskId) => {
+const viewTask = (taskId: number): void => {
   window.location.href = `/${taskId}`;
 };
 
 // Navigate to task creation page
-const createTask = () => {
+const createTask = (): void => {
   window.location.href = '/create';
 };
 

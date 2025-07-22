@@ -1,9 +1,13 @@
 import './bootstrap';
 import { createApp } from 'vue';
+import { createPinia } from 'pinia';
 import TaskList from "./pages/TaskList.vue";
 import TaskDetail from "./pages/TaskDetail.vue";
 import TaskForm from "./pages/TaskForm.vue";
 import Layout from "./layouts/Layout.vue";
+
+// Create Pinia
+const pinia = createPinia();
 
 // Create the Vue app
 const app = createApp({
@@ -42,6 +46,9 @@ const app = createApp({
         </Layout>
     `
 });
+
+// Use Pinia
+app.use(pinia);
 
 // Register components
 app.component('Layout', Layout);

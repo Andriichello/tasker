@@ -32,25 +32,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
-import axios from 'axios';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
+import { useAuthStore } from '../stores';
+import type { Me } from '../api/models/me';
 
-const isAuthenticated = ref<boolean>(false);
-const user = ref<object>({});
+// Get auth store
+const authStore = useAuthStore();
+
+// State
 const showDropdown = ref<boolean>(false);
 
-// Check if a user is authenticated
-const checkAuth = async () => {
-  try {
-    const response = await axios.get('/api/me');
-    isAuthenticated.value = true;
-    user.value = response.data.data;
-  } catch (err) {
-    isAuthenticated.value = false;
-    user.value = {};
-  }
-};
+// Computed properties
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+const user = computed(() => authStore.user || {} as Me);
 
 // Toggle dropdown menu
 const toggleDropdown = () => {
@@ -58,20 +53,19 @@ const toggleDropdown = () => {
 };
 
 // Close dropdown when clicking outside
-const handleClickOutside = (event) => {
-  if (showDropdown.value && !event.target.closest('.relative')) {
+const handleClickOutside = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (showDropdown.value && !target.closest('.relative')) {
     showDropdown.value = false;
   }
 };
 
 // Logout function
 const logout = () => {
-  // Remove token from localStorage
-  localStorage.removeItem('auth_token');
+  // Use auth store to logout
+  authStore.logout();
 
-  // Reset auth state
-  isAuthenticated.value = false;
-  user.value = {};
+  // Close dropdown
   showDropdown.value = false;
 
   // Redirect to home page
@@ -79,7 +73,10 @@ const logout = () => {
 };
 
 onMounted(() => {
-  checkAuth();
+  // Check authentication using the store
+  authStore.getMe();
+
+  // Add event listener for clicking outside
   document.addEventListener('click', handleClickOutside);
 });
 

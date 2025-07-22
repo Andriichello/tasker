@@ -133,108 +133,91 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
 import { ArrowLeft } from 'lucide-vue-next';
+import { useAuthStore, useTasksStore } from '../stores';
+import type { Task } from '../api/models/task';
+import type { Me } from '../api/models/me';
+
+// Get stores
+const authStore = useAuthStore();
+const tasksStore = useTasksStore();
 
 // State
-const task = ref({});
-const loading = ref(true);
-const error = ref(null);
-const isAuthenticated = ref(false);
-const currentUser = ref(null);
 const showDeleteModal = ref(false);
 const newStatus = ref('');
 
 // Get task ID from URL
-const taskId = window.location.pathname.split('/')[1];
+const taskId = parseInt(window.location.pathname.split('/')[1], 10);
 
-// Check if user is authenticated
-const checkAuth = async () => {
-  try {
-    const response = await axios.get('/api/me');
-    isAuthenticated.value = true;
-    currentUser.value = response.data.data;
-    return response.data.data;
-  } catch (err) {
-    isAuthenticated.value = false;
-    currentUser.value = null;
-    return null;
-  }
-};
+// Computed properties
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+const currentUser = computed(() => authStore.user);
+const task = computed(() => tasksStore.getTask || {} as Task);
+const loading = computed(() => tasksStore.isLoading);
+const error = computed(() => tasksStore.getError);
 
 // Fetch task details
 const fetchTask = async () => {
-  loading.value = true;
-  error.value = null;
+  // First check if user is authenticated
+  await authStore.getMe();
 
-  try {
-    // First check if user is authenticated
-    await checkAuth();
-
-    // Fetch task details
-    const response = await axios.get(`/api/tasks/${taskId}`);
-    task.value = response.data.data;
-    newStatus.value = task.value.status;
-  } catch (err) {
-    console.error('Error fetching task:', err);
-    if (err.response && err.response.status === 404) {
-      error.value = 'Task not found.';
-    } else if (err.response && err.response.status === 403) {
-      error.value = 'You do not have permission to view this task.';
-    } else {
-      error.value = 'Failed to load task. Please try again later.';
-    }
-  } finally {
-    loading.value = false;
+  // Fetch task details
+  const fetchedTask = await tasksStore.fetchTask(taskId);
+  if (fetchedTask) {
+    newStatus.value = fetchedTask.status;
   }
 };
 
 // Format date
-const formatDate = (dateString) => {
+const formatDate = (dateString: string | null): string => {
   if (!dateString) return '';
   const date = new Date(dateString);
   return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
 };
 
 // Navigate back to tasks list
-const goBack = () => {
+const goBack = (): void => {
   window.location.href = '/';
 };
 
 // Navigate to edit page
-const editTask = () => {
+const editTask = (): void => {
   window.location.href = `/${taskId}/edit`;
 };
 
 // Show delete confirmation modal
-const confirmDelete = () => {
+const confirmDelete = (): void => {
   showDeleteModal.value = true;
 };
 
 // Delete task
-const deleteTask = async () => {
+const deleteTask = async (): Promise<void> => {
   try {
-    await axios.delete(`/api/tasks/${taskId}`);
-    window.location.href = '/';
+    const success = await tasksStore.deleteTask(taskId);
+    if (success) {
+      window.location.href = '/';
+    }
   } catch (err) {
     console.error('Error deleting task:', err);
-    error.value = 'Failed to delete task. Please try again later.';
     showDeleteModal.value = false;
   }
 };
 
 // Update task status
-const updateStatus = async () => {
+const updateStatus = async (): Promise<void> => {
   try {
-    await axios.patch(`/api/tasks/${taskId}`, {
+    const updatedTask = await tasksStore.updateTask(taskId, {
       status: newStatus.value
     });
-    task.value.status = newStatus.value;
+
+    if (!updatedTask) {
+      // Reset to original status if update failed
+      newStatus.value = task.value.status;
+    }
   } catch (err) {
     console.error('Error updating task status:', err);
-    error.value = 'Failed to update task status. Please try again later.';
     // Reset to original status
     newStatus.value = task.value.status;
   }

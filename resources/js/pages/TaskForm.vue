@@ -130,12 +130,19 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
+import { useAuthStore, useTasksStore } from '../stores';
+import type { Task } from '../api/models/task';
+import type { StoreTaskRequest } from '../api/models/storeTaskRequest';
+import type { UpdateTaskRequest } from '../api/models/updateTaskRequest';
+
+// Get stores
+const authStore = useAuthStore();
+const tasksStore = useTasksStore();
 
 // State
-const form = ref({
+const form = ref<StoreTaskRequest | UpdateTaskRequest>({
   title: '',
   description: '',
   status: 'to-do',
@@ -143,10 +150,12 @@ const form = ref({
   tags: []
 });
 const newTag = ref('');
-const loading = ref(false);
 const submitting = ref(false);
-const error = ref(null);
-const isAuthenticated = ref(false);
+
+// Computed properties
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+const loading = computed(() => tasksStore.isLoading);
+const error = computed(() => tasksStore.getError);
 
 // Determine if we're in edit mode based on the URL
 const isEditMode = computed(() => {
@@ -157,33 +166,16 @@ const isEditMode = computed(() => {
 // Get task ID from URL if in edit mode
 const taskId = computed(() => {
   if (!isEditMode.value) return null;
-  return window.location.pathname.split('/')[1];
+  return parseInt(window.location.pathname.split('/')[1], 10);
 });
 
-// Check if user is authenticated
-const checkAuth = async () => {
-  try {
-    const response = await axios.get('/api/me');
-    isAuthenticated.value = true;
-    return response.data.data;
-  } catch (err) {
-    isAuthenticated.value = false;
-    window.location.href = '/'; // Redirect to home if not authenticated
-    return null;
-  }
-};
-
 // Fetch task data if in edit mode
-const fetchTask = async () => {
-  if (!isEditMode.value) return;
+const fetchTask = async (): Promise<void> => {
+  if (!isEditMode.value || !taskId.value) return;
 
-  loading.value = true;
-  error.value = null;
+  const task = await tasksStore.fetchTask(taskId.value);
 
-  try {
-    const response = await axios.get(`/api/tasks/${taskId.value}`);
-    const task = response.data.data;
-
+  if (task) {
     // Populate form with task data
     form.value = {
       title: task.title,
@@ -192,58 +184,56 @@ const fetchTask = async () => {
       visibility: task.visibility,
       tags: task.tags || []
     };
-  } catch (err) {
-    console.error('Error fetching task:', err);
-    if (err.response && err.response.status === 404) {
-      error.value = 'Task not found.';
-    } else if (err.response && err.response.status === 403) {
-      error.value = 'You do not have permission to edit this task.';
-    } else {
-      error.value = 'Failed to load task. Please try again later.';
-    }
-  } finally {
-    loading.value = false;
   }
 };
 
 // Add a tag to the list
-const addTag = () => {
-  if (newTag.value.trim() && !form.value.tags.includes(newTag.value.trim())) {
+const addTag = (): void => {
+  if (newTag.value.trim() && !form.value.tags?.includes(newTag.value.trim())) {
+    if (!form.value.tags) {
+      form.value.tags = [];
+    }
     form.value.tags.push(newTag.value.trim());
     newTag.value = '';
   }
 };
 
 // Remove a tag from the list
-const removeTag = (index) => {
-  form.value.tags.splice(index, 1);
+const removeTag = (index: number): void => {
+  if (form.value.tags) {
+    form.value.tags.splice(index, 1);
+  }
 };
 
 // Submit the form
-const submitForm = async () => {
+const submitForm = async (): Promise<void> => {
   submitting.value = true;
-  error.value = null;
+  tasksStore.clearError();
 
   try {
-    if (isEditMode.value) {
+    if (isEditMode.value && taskId.value) {
       // Update existing task
-      await axios.patch(`/api/tasks/${taskId.value}`, form.value);
-      window.location.href = `/${taskId.value}`;
+      const updatedTask = await tasksStore.updateTask(taskId.value, form.value as UpdateTaskRequest);
+      if (updatedTask) {
+        window.location.href = `/${taskId.value}`;
+      }
     } else {
       // Create new task
-      const response = await axios.post('/api/tasks', form.value);
-      window.location.href = `/${response.data.data.id}`;
+      const newTask = await tasksStore.createTask(form.value as StoreTaskRequest);
+      if (newTask) {
+        window.location.href = `/${newTask.id}`;
+      }
     }
   } catch (err) {
     console.error('Error saving task:', err);
-    error.value = 'Failed to save task. Please try again later.';
+  } finally {
     submitting.value = false;
   }
 };
 
 // Navigate back
-const goBack = () => {
-  if (isEditMode.value) {
+const goBack = (): void => {
+  if (isEditMode.value && taskId.value) {
     window.location.href = `/${taskId.value}`;
   } else {
     window.location.href = '/';
@@ -253,8 +243,13 @@ const goBack = () => {
 // Initialize component
 onMounted(async () => {
   // Check authentication first
-  const user = await checkAuth();
-  if (!user) return;
+  const user = await authStore.getMe();
+
+  // Redirect to home if not authenticated
+  if (!user) {
+    window.location.href = '/';
+    return;
+  }
 
   // Fetch task data if in edit mode
   if (isEditMode.value) {
