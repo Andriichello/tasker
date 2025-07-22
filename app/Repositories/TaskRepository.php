@@ -24,8 +24,24 @@ class TaskRepository extends CrudRepository
         if ($request) {
             $builder = $builder->index($request);
 
+            $search = $request->query('search');
+            if (isset($search) && is_string($search) && strlen($search) > 0) {
+                $words = preg_split('/\s+/', $search, -1, PREG_SPLIT_NO_EMPTY);
+
+                if (!empty($words)) {
+                    $builder->where(function ($query) use ($words) {
+                        foreach ($words as $word) {
+                            $query->orWhere(function ($subQuery) use ($word) {
+                                $subQuery->where('tasks.title', 'like', '%' . $word . '%')
+                                    ->orWhere('tasks.description', 'like', '%' . $word . '%');
+                            });
+                        }
+                    });
+                }
+            }
+
             $tag = $request->query('tag');
-            if (isset($tag) && is_string($tag)) {
+            if (isset($tag) && is_string($tag) && strlen($tag) > 0) {
                 $builder->join('tag_task', 'tasks.id', '=', 'tag_task.task_id')
                     ->join('tags', 'tags.id', '=', 'tag_task.tag_id')
                     ->where('tags.name', $tag)
@@ -33,7 +49,7 @@ class TaskRepository extends CrudRepository
             }
 
             $status = $request->query('status');
-            if (isset($status) && is_string($status)) {
+            if (isset($status) && is_string($status) && strlen($status) > 0)  {
                 $builder->where('status', $status);
             }
         }
