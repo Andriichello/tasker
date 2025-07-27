@@ -5,7 +5,7 @@ import TaskList from "./pages/TaskList.vue";
 import TaskDetail from "./pages/TaskDetail.vue";
 import TaskForm from "./pages/TaskForm.vue";
 import Login from "./pages/Login.vue";
-import Layout from "./layouts/Layout.vue";
+import BaseLayout from "./layouts/BaseLayout.vue";
 import { authMiddleware } from './middleware';
 
 // Create Pinia
@@ -29,7 +29,6 @@ const app = createApp({
   data() {
     return {
       currentPath: window.location.pathname,
-      isLoading: true,
       canAccess: true
     };
   },
@@ -72,30 +71,21 @@ const app = createApp({
   methods: {
     // Apply middleware before rendering
     async applyMiddleware() {
-      this.isLoading = true;
       this.canAccess = await authMiddleware(this.requiresAuth);
-      this.isLoading = false;
     }
   },
   mounted() {
     // Apply middleware when component is mounted
     this.applyMiddleware();
   },
-  template: `
-    <Layout>
-      <div v-if="isLoading" class="flex justify-center items-center h-64">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      </div>
-      <component v-else-if="canAccess" :is="currentView"></component>
-    </Layout>
-  `
+  template: `<component :is="currentView"></component>`
 });
 
 // Use Pinia
 app.use(pinia);
 
 // Register components
-app.component('Layout', Layout);
+app.component('BaseLayout', BaseLayout);
 app.component('task-list', TaskList);
 app.component('task-detail', TaskDetail);
 app.component('task-form', TaskForm);
