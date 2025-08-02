@@ -457,8 +457,8 @@ const clearAllFilters = () => {
  * 5. Sets the default tab based on authentication status
  */
 onMounted(async () => {
-  // Step 1: Fetch all available tags - this will use cached tags if available
-  await tagsStore.fetchTags();
+  // Step 1: Fetch all available tags - force reload to ensure fresh data on page refresh
+  await tagsStore.fetchTags(true);
 
   // Step 2: Get stored filter values from the store
   const storedSearchQuery = tasksStore.getSearchQuery;

@@ -31,9 +31,15 @@ export const useTagsStore = defineStore('tags', {
   },
 
   actions: {
-    async fetchTags() {
-      // If we already have tags, return them
-      if (this.tags.length > 0) {
+    /**
+     * Fetch tags from the API
+     * @param forceReload - Force reload from API even if tags are already loaded
+     *                      This is used on page refresh or initial load
+     * @returns Array of tags
+     */
+    async fetchTags(forceReload: boolean = false) {
+      // If we already have tags and don't need to force reload, return them
+      if (this.tags.length > 0 && !forceReload) {
         return this.tags;
       }
 
