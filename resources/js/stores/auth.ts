@@ -8,9 +8,11 @@ export interface AuthState {
   isLoadingMe: boolean;
 }
 
+const TOKEN_STORAGE_KEY = 'tasker-token';
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    token: localStorage.getItem('token') as string | null,
+    token: localStorage.getItem(TOKEN_STORAGE_KEY) as string | null,
     me: null as Me | null,
     isLoadingMe: false,
   } as AuthState),
@@ -25,9 +27,9 @@ export const useAuthStore = defineStore('auth', {
       this.token = token;
 
       if (token) {
-        localStorage.setItem('token', token);
+        localStorage.setItem(TOKEN_STORAGE_KEY, token);
       } else {
-        localStorage.removeItem('token');
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
       }
     },
 

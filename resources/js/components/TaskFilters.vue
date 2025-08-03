@@ -99,7 +99,6 @@ const tagFilter = computed({
 
 // Status options for the status filter
 const statusOptions = [
-  { value: '', label: 'All Statuses' },
   { value: 'to-do', label: 'To Do' },
   { value: 'in-progress', label: 'In Progress' },
   { value: 'canceled', label: 'Canceled' },

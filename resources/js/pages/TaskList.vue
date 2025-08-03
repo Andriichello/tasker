@@ -106,14 +106,6 @@ const tagFilter = computed({
   set: (value) => tasksStore.updateFilters(undefined, undefined, value)
 });
 
-// Status options for the status filter
-const statusOptions = [
-  { value: '', label: 'All Statuses' },
-  { value: 'to-do', label: 'To Do' },
-  { value: 'in-progress', label: 'In Progress' },
-  { value: 'canceled', label: 'Canceled' },
-  { value: 'done', label: 'Done' }
-];
 
 // Get tags from the tags store for the tag filter dropdown
 const availableTags = computed(() => {
