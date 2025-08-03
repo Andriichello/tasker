@@ -72,7 +72,29 @@
                     class="bg-white shadow-xs rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-200"
                     :task="task"
                     :currentUserId="authStore.user?.id"
-                    @click="viewTask"/>
+                    @click="viewTask"
+                    @edit="editTask"
+                    @delete="showDeleteConfirmation"/>
+        </div>
+      </div>
+
+      <!-- Delete confirmation modal -->
+      <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Confirm Delete</h3>
+          <p class="text-gray-600 mb-6">Are you sure you want to delete this task? This action cannot be undone.</p>
+          <div class="flex justify-end gap-3">
+            <button
+              @click="showDeleteModal = false"
+              class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
+              Cancel
+            </button>
+            <button
+              @click="confirmDelete"
+              class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+              Delete
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -99,6 +121,8 @@ const router = useRouter();
 // State
 const activeTab = ref<'all' | 'public' | 'private' | 'my'>('all');
 const lastSearchTime = ref(0);
+const showDeleteModal = ref(false);
+const taskToDelete = ref<number | null>(null);
 
 // Last used filter values for caching
 const lastSearchQuery = ref<string | undefined>(undefined);
@@ -235,6 +259,39 @@ const viewTask = (taskId: number): void => {
 // Navigate to task creation page
 const createTask = (): void => {
   router.push('/create');
+};
+
+// Navigate to task edit page
+const editTask = (task: Task): void => {
+  router.push(`/${task.id}/edit`);
+};
+
+// Show delete confirmation modal
+const showDeleteConfirmation = (taskId: number): void => {
+  taskToDelete.value = taskId;
+  showDeleteModal.value = true;
+};
+
+// Confirm and execute task deletion
+const confirmDelete = async (): void => {
+  if (taskToDelete.value) {
+    try {
+      await tasksStore.deleteTask(taskToDelete.value);
+      // Refresh the task list after deletion
+      fetchTasks(
+        tasksStore.getSearchQuery,
+        tasksStore.getStatusFilter,
+        tasksStore.getTagFilter,
+        true
+      );
+    } catch (error) {
+      console.error('Failed to delete task:', error);
+    } finally {
+      // Close the modal and reset taskToDelete
+      showDeleteModal.value = false;
+      taskToDelete.value = null;
+    }
+  }
 };
 
 const debouncedHandleFilterSearch = (timeout: number = 500) => {
