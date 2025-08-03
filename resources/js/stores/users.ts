@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
-import { indexUsers, showUser } from '../api/services/users';
-import type { User } from '../api/models/user';
+import { indexUsers, showUser } from '@/api';
+import type { User } from '@/api';
 
 export const useUsersStore = defineStore('users', {
   state: () => ({

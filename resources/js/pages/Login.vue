@@ -1,8 +1,8 @@
 <template>
   <div class="max-w-md mx-auto mt-5 mb-10 text-center">
-    <a href="/" class="text-blue-500 hover:text-blue-700 text-lg font-bold">
+    <router-link to="/" class="text-blue-500 hover:text-blue-700 text-lg font-bold">
       Go to Tasks Page
-    </a>
+    </router-link>
   </div>
 
   <div class="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
@@ -65,12 +65,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
-import { useAuthStore } from '../stores';
-import AuthLayout from "../layouts/AuthLayout.vue";
+import {reactive, ref} from 'vue';
+import {useAuthStore} from '@/stores';
+import {useRouter} from 'vue-router';
 
-// Get auth store
+// Get auth store and router
 const authStore = useAuthStore();
+const router = useRouter();
 
 // Form state
 const form = reactive({
@@ -135,8 +136,8 @@ const handleLogin = async () => {
     });
 
     if (success) {
-      // Redirect to home page on successful login
-      window.location.href = '/';
+      // Redirect to home page on successful login using router
+      router.push('/');
     } else {
       error.value = 'Invalid email or password';
     }

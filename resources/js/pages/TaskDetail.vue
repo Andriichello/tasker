@@ -127,17 +127,20 @@ import type { Task } from '../api/models/task';
 import type { Me } from '../api/models/me';
 import BaseLayout from '../layouts/BaseLayout.vue';
 import type {UpdateTaskRequestStatus} from '@/api';
+import { useRouter, useRoute } from 'vue-router';
 
-// Get stores
+// Get stores, router and route
 const authStore = useAuthStore();
 const tasksStore = useTasksStore();
+const router = useRouter();
+const route = useRoute();
 
 // State
 const showDeleteModal = ref(false);
 const newStatus = ref('');
 
-// Get task ID from URL
-const taskId = parseInt(window.location.pathname.split('/')[1], 10);
+// Get task ID from route params
+const taskId = parseInt(route.params.taskId as string, 10);
 
 // Computed properties
 const isAuthenticated = computed(() => authStore.isAuthenticated);
@@ -169,12 +172,12 @@ const formatDate = (dateString: string | null): string => {
 
 // Navigate back to tasks list
 const goBack = (): void => {
-  window.location.href = '/';
+  router.push('/');
 };
 
 // Navigate to edit page
 const editTask = (): void => {
-  window.location.href = `/${taskId}/edit`;
+  router.push(`/${taskId}/edit`);
 };
 
 // Show delete confirmation modal
@@ -187,7 +190,7 @@ const deleteTask = async (): Promise<void> => {
   try {
     const success = await tasksStore.deleteTask(taskId);
     if (success) {
-      window.location.href = '/';
+      router.push('/');
     }
   } catch (err) {
     console.error('Error deleting task:', err);

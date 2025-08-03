@@ -1,20 +1,12 @@
 import './bootstrap.ts';
-import { createApp } from 'vue';
-import { createPinia } from 'pinia';
-import type { PiniaPluginContext } from 'pinia';
+import {createApp} from 'vue';
+import {createPinia} from 'pinia';
 import App from './App.vue';
 import router from './router';
 import {useAuthStore} from './stores';
 
 // Create Pinia
 const pinia = createPinia();
-
-// Add a plugin to persist state changes to localStorage
-pinia.use(({ store }: PiniaPluginContext) => {
-  if (store.$id === 'auth') {
-    // process access token here...
-  }
-});
 
 router.beforeEach((to, from, next) => {
   const isOpen = to.matched.some(record => !record.meta.requiresAuth);

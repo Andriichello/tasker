@@ -5,32 +5,16 @@ import {
   storeTask,
   updateTask,
   destroyTask
-} from '../api/services/tasks';
-import type { Task } from '../api/models/task';
-import type { StoreTaskRequest } from '../api/models/storeTaskRequest';
-import type { UpdateTaskRequest } from '../api/models/updateTaskRequest';
-
-// Helper function to load persisted state from localStorage
-const loadPersistedState = (key: string) => {
-  try {
-    const storedState = localStorage.getItem(`pinia-${key}`);
-    return storedState ? JSON.parse(storedState) : null;
-  } catch (e) {
-    console.error(`Error loading persisted state for ${key}:`, e);
-    return null;
-  }
-};
-
-// Get persisted tasks data
-const persistedState = loadPersistedState('tasks');
+} from '@/api';
+import type { Task, StoreTaskRequest, UpdateTaskRequest  } from '@/api';
 
 export const useTasksStore = defineStore('tasks', {
   state: () => ({
-    tasks: persistedState?.tasks || [] as Task[],
-    task: persistedState?.task || null as Task | null,
-    searchQuery: persistedState?.searchQuery || '',
-    statusFilter: persistedState?.statusFilter || null,
-    tagFilter: persistedState?.tagFilter || null,
+    tasks: [] as Task[],
+    task: null as Task | null,
+    searchQuery: '',
+    statusFilter: null,
+    tagFilter: null,
     loading: false,
     error: null as string | null,
   }),
@@ -74,7 +58,6 @@ export const useTasksStore = defineStore('tasks', {
           const options = Object.keys(params).length > 0 ? { params } : undefined;
           const response = await indexTasks(options);
           this.tasks = response.data.data || [];
-          this.persistState();
           return this.tasks;
         } catch (error) {
           this.error = 'Failed to fetch tasks';
@@ -108,7 +91,6 @@ export const useTasksStore = defineStore('tasks', {
       try {
         const response = await showTask(id);
         this.task = response.data.data || null;
-        this.persistState();
         return this.task;
       } catch (error) {
         this.error = `Failed to fetch task with ID ${id}`;
@@ -129,7 +111,6 @@ export const useTasksStore = defineStore('tasks', {
         if (newTask) {
           this.tasks = [...this.tasks, newTask];
           this.task = newTask;
-          this.persistState();
         }
 
         return newTask;
@@ -159,8 +140,6 @@ export const useTasksStore = defineStore('tasks', {
           if (this.task && this.task.id === id) {
             this.task = updatedTask;
           }
-
-          this.persistState();
         }
 
         return updatedTask;
@@ -187,7 +166,6 @@ export const useTasksStore = defineStore('tasks', {
           this.task = null;
         }
 
-        this.persistState();
         return true;
       } catch (error) {
         this.error = `Failed to delete task with ID ${id}`;
@@ -199,7 +177,6 @@ export const useTasksStore = defineStore('tasks', {
 
     clearTask() {
       this.task = null;
-      this.persistState();
     },
 
     clearError() {
@@ -217,7 +194,6 @@ export const useTasksStore = defineStore('tasks', {
         // Convert empty string to null for tag filter
         this.tagFilter = tagFilter === '' ? null : tagFilter;
       }
-      this.persistState();
     },
 
     // Clear all filters
@@ -225,22 +201,6 @@ export const useTasksStore = defineStore('tasks', {
       this.searchQuery = '';
       this.statusFilter = null;
       this.tagFilter = null;
-      this.persistState();
-    },
-
-    // Persist state to localStorage
-    persistState() {
-      try {
-        localStorage.setItem('pinia-tasks', JSON.stringify({
-          tasks: this.tasks,
-          task: this.task,
-          searchQuery: this.searchQuery,
-          statusFilter: this.statusFilter,
-          tagFilter: this.tagFilter
-        }));
-      } catch (e) {
-        console.error('Error persisting tasks state:', e);
-      }
     }
   },
 });

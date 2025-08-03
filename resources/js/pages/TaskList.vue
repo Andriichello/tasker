@@ -213,11 +213,13 @@ import { Search, X } from 'lucide-vue-next';
 import Multiselect from '@vueform/multiselect';
 import '@vueform/multiselect/themes/default.css';
 import BaseLayout from "../layouts/BaseLayout.vue";
+import { useRouter } from 'vue-router';
 
-// Get stores
+// Get stores and router
 const authStore = useAuthStore();
 const tasksStore = useTasksStore();
 const tagsStore = useTagsStore();
+const router = useRouter();
 
 // State
 const activeTab = ref<'all' | 'public' | 'private' | 'my'>('all');
@@ -420,12 +422,12 @@ const truncateDescription = (description: string | null): string => {
 
 // Navigate to task detail page
 const viewTask = (taskId: number): void => {
-  window.location.href = `/${taskId}`;
+  router.push(`/${taskId}`);
 };
 
 // Navigate to task creation page
 const createTask = (): void => {
-  window.location.href = '/create';
+  router.push('/create');
 };
 
 /**

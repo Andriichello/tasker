@@ -137,10 +137,13 @@ import type { Task } from '../api/models/task';
 import type { StoreTaskRequest } from '../api/models/storeTaskRequest';
 import type { UpdateTaskRequest } from '../api/models/updateTaskRequest';
 import BaseLayout from "../layouts/BaseLayout.vue";
+import { useRouter, useRoute } from 'vue-router';
 
-// Get stores
+// Get stores, router and route
 const authStore = useAuthStore();
 const tasksStore = useTasksStore();
+const router = useRouter();
+const route = useRoute();
 
 // State
 const form = ref<StoreTaskRequest | UpdateTaskRequest>({
@@ -158,16 +161,15 @@ const isAuthenticated = computed(() => authStore.isAuthenticated);
 const loading = computed(() => tasksStore.isLoading);
 const error = computed(() => tasksStore.getError);
 
-// Determine if we're in edit mode based on the URL
+// Determine if we're in edit mode based on the route
 const isEditMode = computed(() => {
-  const path = window.location.pathname;
-  return /^\/\d+\/edit$/.test(path);
+  return route.name === 'TaskEdit';
 });
 
-// Get task ID from URL if in edit mode
+// Get task ID from route params if in edit mode
 const taskId = computed(() => {
   if (!isEditMode.value) return null;
-  return parseInt(window.location.pathname.split('/')[1], 10);
+  return parseInt(route.params.taskId as string, 10);
 });
 
 // Fetch task data if in edit mode
@@ -216,13 +218,13 @@ const submitForm = async (): Promise<void> => {
       // Update existing task
       const updatedTask = await tasksStore.updateTask(taskId.value, form.value as UpdateTaskRequest);
       if (updatedTask) {
-        window.location.href = `/${taskId.value}`;
+        router.push(`/${taskId.value}`);
       }
     } else {
       // Create new task
       const newTask = await tasksStore.createTask(form.value as StoreTaskRequest);
       if (newTask) {
-        window.location.href = `/${newTask.id}`;
+        router.push(`/${newTask.id}`);
       }
     }
   } catch (err) {
@@ -235,9 +237,9 @@ const submitForm = async (): Promise<void> => {
 // Navigate back
 const goBack = (): void => {
   if (isEditMode.value && taskId.value) {
-    window.location.href = `/${taskId.value}`;
+    router.push(`/${taskId.value}`);
   } else {
-    window.location.href = '/';
+    router.push('/');
   }
 };
 
@@ -248,7 +250,7 @@ onMounted(async () => {
 
   // Redirect to home if not authenticated
   if (!user) {
-    window.location.href = '/';
+    router.push('/');
     return;
   }
 

@@ -3,7 +3,7 @@
     <div class="container mx-auto flex justify-between items-center">
       <!-- App Name -->
       <div class="text-xl font-bold">
-        <a href="/" class="hover:text-blue-200">Tasker</a>
+        <router-link to="/" class="hover:text-blue-200">Tasker</router-link>
       </div>
 
       <!-- User Info and Dropdown -->
@@ -13,9 +13,9 @@
           <ChevronDown class="h-5 w-5" />
         </div>
         <div v-else>
-          <a href="/login" class="hover:text-blue-200" v-if="!isLogin">
+          <router-link to="/login" class="hover:text-blue-200" v-if="!isLogin">
             Login
-          </a>
+          </router-link>
         </div>
 
         <!-- Dropdown Menu -->
@@ -38,15 +38,17 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
 import { useAuthStore } from '../stores';
 import type { Me } from '../api/models/me';
+import { useRouter } from 'vue-router';
 
-// Get auth store
+// Get auth store and router
 const authStore = useAuthStore();
+const router = useRouter();
 
 // State
 const showDropdown = ref<boolean>(false);
 
 // Computed properties
-const isLogin = computed(() => window.location.pathname === '/login');
+const isLogin = computed(() => router.currentRoute.value.path === '/login');
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 const user = computed(() => authStore.user || {} as Me);
 
@@ -72,8 +74,8 @@ const logout = () => {
   // Close dropdown
   showDropdown.value = false;
 
-  // Redirect to home page
-  window.location.href = '/';
+  // Redirect to home page using router
+  router.push('/');
 };
 
 onMounted(() => {
