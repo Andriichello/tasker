@@ -1,7 +1,18 @@
 <template>
-  <!-- Filters Container -->
-  <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
-    <div class="flex flex-col lg:flex-row gap-4">
+  <div class="">
+    <div class="flex flex-wrap items-center justify-between mb-4">
+      <h2 class="text-xl font-bold text-gray-900">Filters</h2>
+      <!-- Clear Filters Button -->
+      <button
+        v-if="hasActiveFilters"
+        @click="clearAllFilters"
+        class="px-5 py-0.5 border border-red-500 text-red-500 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+      >
+        Clear
+      </button>
+    </div>
+
+    <div class="flex flex-col gap-4">
       <!-- Search Input -->
       <div class="flex-1">
         <div class="relative">
@@ -16,35 +27,27 @@
         </div>
       </div>
 
-      <!-- Status Filter -->
-      <select
-        v-model="statusFilter"
-        class="px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-        @change="handleSearch"
-      >
-        <option :value="null">All Statuses</option>
-        <option v-for="option in statusOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
-      </select>
+      <div class="flex flex-wrap gap-3">
+        <!-- Status Filter -->
+        <select
+          v-model="statusFilter"
+          class="px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          @change="handleSearch"
+        >
+          <option :value="null">All Statuses</option>
+          <option v-for="option in statusOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
+        </select>
 
-      <!-- Tag Filter -->
-      <select
-        v-model="tagFilter"
-        class="px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-        @change="handleSearch"
-      >
-        <option :value="null">All Tags</option>
-        <option v-for="tag in availableTags" :key="tag.value" :value="tag.value">{{ tag.label }}</option>
-      </select>
-
-      <!-- Clear Filters Button -->
-      <button
-        v-if="hasActiveFilters"
-        @click="clearAllFilters"
-        class="px-4 py-3 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
-      >
-        <XIcon class="h-4 w-4" />
-        Clear Filters
-      </button>
+        <!-- Tag Filter -->
+        <select
+          v-model="tagFilter"
+          class="px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          @change="handleSearch"
+        >
+          <option :value="null">All Tags</option>
+          <option v-for="tag in availableTags" :key="tag.value" :value="tag.value">{{ tag.label }}</option>
+        </select>
+      </div>
     </div>
   </div>
 </template>

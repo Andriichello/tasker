@@ -67,13 +67,13 @@
           {{ loading ? 'Signing in...' : 'Sign In' }}
         </button>
 
-        <button @click.stop="router.push('/')" class="w-full bg-gray-400 text-white py-3 rounded-lg hover:bg-gray-500 transition-colors font-medium flex items-center justify-center gap-2 cursor-pointer">
+        <button @click.stop="router.push('/')" class="w-full text-md text-gray-500 hover:text-gray-700 transition-colors px-4 py-3 rounded-lg hover:bg-gray-100 cursor-pointer">
           Continue as Guest
         </button>
       </form>
 
       <!-- Demo Credentials -->
-      <div class="mt-6 p-4 bg-blue-50 rounded-lg cursor-pointer"
+      <div class="mt-4 p-4 bg-blue-50 rounded-lg cursor-pointer"
            @click="form.email = 'first@example.com'; form.password = 'secret'">
         <p class="text-md text-blue-700 font-medium mb-2">Demo Credentials:</p>
         <div class="flex flex-wrap justify-start items-center gap-5 text-md text-blue-600">

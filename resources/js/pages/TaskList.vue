@@ -10,18 +10,17 @@
         <button
           v-if="isAuthenticated"
           @click="createTask"
-          class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 font-medium"
+          class="bg-blue-600 text-white text-lg px-6 py-3 rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 font-medium"
         >
           <PlusIcon class="h-5 w-5" />
-          Create Task
+          Create
         </button>
       </div>
 
       <!-- Task Filters Component -->
-      <TaskFilters
+      <TaskFilters class="mb-8"
         @search="handleFilterSearch"
-        @clearFilters="clearAllFilters"
-      />
+        @clearFilters="clearAllFilters"/>
 
       <!-- Loading state -->
       <div v-if="loading" class="flex justify-center items-center py-10">
@@ -35,18 +34,14 @@
 
       <!-- Empty state -->
       <div v-else-if="tasks.length === 0" class="text-center py-16">
-        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div class="w-16 h-16 bg-gray-200/60 rounded-full flex items-center justify-center mx-auto mb-4">
           <ListIcon class="h-8 w-8 text-gray-400" />
         </div>
         <h3 class="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
-        <p class="text-gray-500 mb-6">Create your first task to get started</p>
-        <button
-          v-if="isAuthenticated"
-          @click="createTask"
-          class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-        >
-          Create Your First Task
-        </button>
+
+        <p class="text-gray-500 mb-6">
+          {{ isAuthenticated ? 'But you can always create one...' : 'Log in and you will be able to create tasks...' }}
+        </p>
       </div>
 
       <!-- Task lists with tabs -->

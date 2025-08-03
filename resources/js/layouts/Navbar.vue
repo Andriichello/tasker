@@ -1,9 +1,14 @@
 <template>
-  <nav class="bg-blue-600 text-white p-4">
-    <div class="container mx-auto flex justify-between items-center">
-      <!-- App Name -->
-      <div class="text-xl font-bold">
-        <router-link to="/" class="hover:text-blue-200">Tasker</router-link>
+  <nav class="bg-white shadow-sm z-[1]">
+    <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3"
+           @click="router.push('/')">
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+          <CheckSquareIcon class="h-5 w-5 text-white" />
+        </div>
+        <h1 class="text-xl font-bold text-gray-900 cursor-pointer">
+          Tasker
+        </h1>
       </div>
 
       <!-- User Info and Dropdown -->
@@ -13,8 +18,8 @@
           <ChevronDown class="h-5 w-5" />
         </div>
         <div v-else>
-          <router-link to="/login" class="hover:text-blue-200" v-if="!isLogin">
-            Login
+          <router-link to="/login" class="text-sm text-gray-500 hover:text-gray-700 transition-colors px-4 py-3 rounded-lg hover:bg-gray-100" v-if="!isLogin">
+            Log In
           </router-link>
         </div>
 
@@ -35,7 +40,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { ChevronDown } from 'lucide-vue-next';
+import { ChevronDown, CheckSquareIcon } from 'lucide-vue-next';
 import { useAuthStore } from '../stores';
 import type { Me } from '../api/models/me';
 import { useRouter } from 'vue-router';
