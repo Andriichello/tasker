@@ -19,6 +19,14 @@
 
       <!-- Task Filters Component -->
       <TaskFilters class="mb-8 px-4"
+        :search-query="searchQuery"
+        :status-filter="statusFilter"
+        :tag-filter="tagFilter"
+        @update:searchQuery="updateSearchQuery"
+        @update:statusFilter="updateStatusFilter"
+        @update:tagFilter="updateTagFilter"
+        @statusFilterChange="updateStatusFilter"
+        @tagFilterChange="updateTagFilter"
         @search="handleFilterSearch"
         @clearFilters="clearAllFilters"/>
 
@@ -80,6 +88,7 @@ import TaskFilters from '../components/TaskFilters.vue';
 import TaskTabs from '../components/TaskTabs.vue';
 import TaskItem from '../components/TaskItem.vue';
 import { PlusIcon, ListIcon } from 'lucide-vue-next';
+import {debounce} from "lodash";
 
 // Get stores and router
 const authStore = useAuthStore();
@@ -90,7 +99,11 @@ const router = useRouter();
 // State
 const activeTab = ref<'all' | 'public' | 'private' | 'my'>('all');
 const lastSearchTime = ref(0);
-const debounceTime = 500;
+
+// Last used filter values for caching
+const lastSearchQuery = ref<string | undefined>(undefined);
+const lastStatusFilter = ref<string | undefined>(undefined);
+const lastTagFilter = ref<string | undefined>(undefined);
 
 // Use computed properties for filter values to sync with the store
 const searchQuery = computed({
@@ -108,29 +121,11 @@ const tagFilter = computed({
   set: (value) => tasksStore.updateFilters(undefined, undefined, value)
 });
 
-
-// Get tags from the tags store for the tag filter dropdown
-const availableTags = computed(() => {
-  // Format tags for Multiselect component
-  return [
-    ...tagsStore.getTags.map(tag => ({ value: tag.name, label: tag.name }))
-  ];
-});
-
 // Computed properties
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 const tasks = computed(() => tasksStore.getTasks);
 const loading = computed(() => tasksStore.isLoading);
 const error = computed(() => tasksStore.getError);
-
-// Check if any filters are active
-const hasActiveFilters = computed(() => {
-  return (
-    (searchQuery.value && searchQuery.value.trim() !== '') ||
-    statusFilter.value !== null ||
-    tagFilter.value !== null
-  );
-});
 
 // Computed properties for filtered tasks
 const privateTasks = computed(() => {
@@ -170,7 +165,7 @@ const displayedTasks = computed(() => {
   // Then, filter by status if a status filter is selected
   if (statusFilter.value) {
     // Handle both string and object formats for statusFilter
-    const statusValue = typeof statusFilter.value === 'object' && statusFilter.value !== null
+    const statusValue = typeof statusFilter.value === 'object'
       ? statusFilter.value.value
       : statusFilter.value;
 
@@ -182,7 +177,7 @@ const displayedTasks = computed(() => {
   // Finally, filter by tag if a tag filter is selected
   if (tagFilter.value) {
     // Handle both string and object formats for tagFilter
-    const tagValue = typeof tagFilter.value === 'object' && tagFilter.value !== null
+    const tagValue = typeof tagFilter.value === 'object'
       ? tagFilter.value.value || tagFilter.value
       : tagFilter.value;
 
@@ -203,70 +198,19 @@ const fetchTasks = async (search?: string, status?: string, tag?: string, forceR
     await authStore.getMe();
   }
 
-  // Fetch tasks using the store with server-side filtering
-  await tasksStore.fetchTasks(search, status, tag, forceReload);
-};
+  // Check if filter values have changed or if forceReload is true
+  if (forceReload ||
+      search !== lastSearchQuery.value ||
+      status !== lastStatusFilter.value ||
+      tag !== lastTagFilter.value) {
 
-/**
- * Handle search with debounce and detect when filters are cleared
- * This function is called when:
- * - The search button is clicked
- * - Enter is pressed in the search input
- * - A status filter is changed
- * - A tag filter is changed
- */
-const handleSearch = () => {
-  const currentTime = Date.now();
-  const timeSinceLastSearch = currentTime - lastSearchTime.value;
+    // Update last used filter values
+    lastSearchQuery.value = search;
+    lastStatusFilter.value = status;
+    lastTagFilter.value = tag;
 
-  // Only perform search if debounce time has passed
-  if (timeSinceLastSearch >= debounceTime) {
-    // Process search query - trim and convert empty string to undefined
-    const searchTerm = searchQuery.value.trim() || undefined;
-
-    // Extract the actual value from status filter (handling both string and object formats)
-    const statusValue = statusFilter.value ?
-      (typeof statusFilter.value === 'object' && statusFilter.value !== null ?
-        statusFilter.value.value :
-        statusFilter.value) :
-      undefined;
-
-    // Extract the actual value from tag filter (handling both string and object formats)
-    const tagValue = tagFilter.value ?
-      (typeof tagFilter.value === 'object' && tagFilter.value !== null ?
-        tagFilter.value.value :
-        tagFilter.value) :
-      undefined;
-
-    // IMPORTANT: Detect if any filters have been cleared to force a reload
-    // This ensures tasks are loaded when filters are cleared, as required by the issue
-
-    // Get previous filter values from the store
-    const previousSearchQuery = tasksStore.getSearchQuery;
-    const previousStatusFilter = tasksStore.getStatusFilter;
-    const previousTagFilter = tasksStore.getTagFilter;
-
-    // Check if each filter has been cleared
-    const searchChanged = previousSearchQuery !== searchTerm;
-    const statusChanged = previousStatusFilter !== statusValue;
-    const tagChanged = previousTagFilter !== tagValue;
-
-    // Force reload if any filter has been changed
-    const forceReload = searchChanged || statusChanged || tagChanged;
-
-    // Update the store with the current filter values
-    tasksStore.updateFilters(
-      searchTerm || '',
-      statusFilter.value,
-      tagFilter.value
-    );
-
-    // Send all filters to the backend, with forceReload if filters were cleared
-    fetchTasks(searchTerm, statusValue, tagValue, forceReload);
-    lastSearchTime.value = currentTime;
-  } else {
-    // If debounce time hasn't passed, show a message or visual feedback
-    console.log(`Please wait ${Math.ceil((debounceTime - timeSinceLastSearch) / 1000)} seconds before searching again`);
+    // Fetch tasks using the store with server-side filtering
+    await tasksStore.fetchTasks(search, status, tag, forceReload);
   }
 };
 
@@ -274,23 +218,11 @@ const handleSearch = () => {
  * Handle filter search event from TaskFilters component
  * @param filters Object containing searchTerm, statusValue, and tagValue
  */
-const handleFilterSearch = (filters: { searchTerm?: string, statusValue?: string, tagValue?: string }) => {
+const handleFilterSearch = (filters: { searchTerm?: string, statusValue?: string, tagValue?: string }, forceReload: boolean = false) => {
   const { searchTerm, statusValue, tagValue } = filters;
 
-  // Get previous filter values from the store
-  const previousSearchQuery = tasksStore.getSearchQuery;
-  const previousStatusFilter = tasksStore.getStatusFilter;
-  const previousTagFilter = tasksStore.getTagFilter;
-
-  // Check if each filter has been changed
-  const searchChanged = previousSearchQuery !== searchTerm;
-  const statusChanged = previousStatusFilter !== statusValue;
-  const tagChanged = previousTagFilter !== tagValue;
-
-  // Force reload if any filter has been changed
-  const forceReload = searchChanged || statusChanged || tagChanged;
-
-  // Send all filters to the backend, with forceReload if filters were changed
+  // The filter values have already been updated in the store via the update events
+  // We just need to fetch tasks with the current filter values
   fetchTasks(searchTerm, statusValue, tagValue, forceReload);
   lastSearchTime.value = Date.now();
 };
@@ -305,21 +237,54 @@ const createTask = (): void => {
   router.push('/create');
 };
 
+const debouncedHandleFilterSearch = (timeout: number = 500) => {
+  debounce(() => {
+    handleFilterSearch({
+      searchTerm: tasksStore.searchQuery,
+      statusValue: tasksStore.statusFilter,
+      tagValue: tasksStore.tagFilter,
+    });
+  }, timeout)();
+}
+
 /**
- * Clear all filters and fetch tasks without any filters
- * This function is called when the user clicks the "Clear Filters" button
- * It:
- * 1. Resets all filter values in the store to their defaults
- * 2. Forces a reload of tasks from the API (even though no filters are active)
- * This ensures fresh data is loaded when filters are cleared, as required by the issue
+ * Update search query filter
+ * @param value New search query value
  */
+const updateSearchQuery = async (value: string) => {
+  console.log('updateSearchQuery', value);
+  tasksStore.updateFilters(value, undefined, undefined);
+
+  debouncedHandleFilterSearch(500);
+};
+
+/**
+ * Update status filter
+ * @param value New status filter value
+ */
+const updateStatusFilter = (value: string | null) => {
+  console.log('updateStatusFilter', value);
+  tasksStore.updateFilters(undefined, value, undefined);
+
+  debouncedHandleFilterSearch(50);
+};
+
+/**
+ * Update tag filter
+ * @param value New tag filter value
+ */
+const updateTagFilter = (value: string | null) => {
+  console.log('updateTagFilter', value);
+  tasksStore.updateFilters(undefined, undefined, value);
+
+  debouncedHandleFilterSearch(50);
+};
+
 const clearAllFilters = () => {
   // Reset all filter values in the store
   tasksStore.clearFilters();
 
-  // Force reload tasks from API when filters are cleared
-  // The true parameter ensures tasks are reloaded even when no filters are active
-  fetchTasks(undefined, undefined, undefined, true);
+  debouncedHandleFilterSearch(10);
 };
 
 /**
@@ -346,13 +311,13 @@ onMounted(async () => {
     const searchTerm = storedSearchQuery.trim() || undefined;
 
     const statusValue = storedStatusFilter ?
-      (typeof storedStatusFilter === 'object' && storedStatusFilter !== null ?
+      (typeof storedStatusFilter === 'object' ?
         storedStatusFilter.value :
         storedStatusFilter) :
       undefined;
 
     const tagValue = storedTagFilter ?
-      (typeof storedTagFilter === 'object' && storedTagFilter !== null ?
+      (typeof storedTagFilter === 'object' ?
         storedTagFilter.value || storedTagFilter :
         storedTagFilter) :
       undefined;

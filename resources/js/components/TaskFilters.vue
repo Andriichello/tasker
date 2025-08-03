@@ -20,8 +20,6 @@
           <input
             type="text"
             v-model="localSearchQuery"
-            @keyup.enter="handleSearch"
-            @blur="handleSearch"
             placeholder="Search tasks..."
             class="w-full min-w-xs max-w-3xs pl-10 pr-4 py-3 border border-gray-300 rounded-lg transition-colors"
           />
@@ -30,73 +28,95 @@
 
       <div class="flex flex-row flex-wrap gap-3">
         <!-- Status Filter -->
-        <select
-          v-model="statusFilter"
-          class="min-w-3xs px-4 py-3 border border-gray-300 rounded-lg transition-colors"
-          @change="handleSearch"
-        >
-          <option :value="null">All Statuses</option>
-          <option v-for="option in statusOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
-        </select>
+        <Multiselect
+          v-model="localStatus"
+          :options="statusOptionsWithAll"
+          :searchable="true"
+          mode="single"
+          placeholder="Select status"
+          class="min-w-3xs"
+        />
 
         <!-- Tag Filter -->
-        <select
-          v-model="tagFilter"
-          class="min-w-3xs px-4 py-3 border border-gray-300 rounded-lg transition-colors"
-          @change="handleSearch"
-        >
-          <option :value="null">All Tags</option>
-          <option v-for="tag in availableTags" :key="tag.value" :value="tag.value">{{ tag.label }}</option>
-        </select>
+        <Multiselect
+          v-model="localTag"
+          :options="availableTags"
+          :searchable="true"
+          mode="single"
+          placeholder="Select tag"
+          class="min-w-3xs"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
-import { useTasksStore, useTagsStore } from '../stores';
-import { SearchIcon, XIcon } from 'lucide-vue-next';
-import { debounce } from 'lodash';
+import {computed, ref, watch} from 'vue';
+import {useTagsStore} from '@/stores';
+import {SearchIcon} from 'lucide-vue-next';
+import Multiselect from '@vueform/multiselect';
+import '@vueform/multiselect/themes/default.css';
 
-// Get stores
-const tasksStore = useTasksStore();
+// Define props
+const props = defineProps({
+  searchQuery: {
+    type: String,
+    default: ''
+  },
+  statusFilter: {
+    type: [String, Object, null],
+    default: null
+  },
+  tagFilter: {
+    type: [String, Object, null],
+    default: null
+  }
+});
+
+// Get tags store
 const tagsStore = useTagsStore();
 
 // Emits
-const emit = defineEmits(['search', 'clearFilters']);
+const emit = defineEmits(['update:searchQuery', 'update:statusFilter', 'update:tagFilter', 'search', 'clearFilters', 'statusFilterChange', 'tagFilterChange']);
 
-// Create a local ref for the search input with debounce
-const localSearchQuery = ref(tasksStore.getSearchQuery || '');
+const localSearchQuery = ref(props.searchQuery || '');
+const localStatus = ref(props.tagFilter || null);
+const localTag = ref(props.tagFilter || null);
 
-// Create a debounced function using lodash
-const debouncedSearch = debounce((newValue: string) => {
-  tasksStore.updateFilters(newValue, undefined, undefined);
-  // Only trigger search if we have a value or had a value before
-  if (newValue.trim() !== '' || tasksStore.getSearchQuery) {
-    handleSearch();
-  }
-}, 500);
-
-// Set up a watcher to call the debounced function
+// Watch for changes to localSearchQuery
 watch(localSearchQuery, (newValue) => {
-  debouncedSearch(newValue);
+  // Emit update event immediately
+  emit('update:searchQuery', newValue);
 });
 
-// Keep the computed property for other parts of the code that might use it
-const searchQuery = computed({
-  get: () => tasksStore.getSearchQuery,
-  set: (value) => tasksStore.updateFilters(value, undefined, undefined)
+watch(localStatus, (newValue) => {
+  // Emit update event immediately
+  emit('update:statusFilter', newValue);
 });
 
-const statusFilter = computed({
-  get: () => tasksStore.getStatusFilter,
-  set: (value) => tasksStore.updateFilters(undefined, value, undefined)
+watch(localTag, (newValue) => {
+  // Emit update event immediately
+  emit('update:tagFilter', newValue);
 });
 
-const tagFilter = computed({
-  get: () => tasksStore.getTagFilter,
-  set: (value) => tasksStore.updateFilters(undefined, undefined, value)
+// Set up watchers for props to update local state
+watch(() => props.searchQuery, (newValue) => {
+  if (newValue !== localSearchQuery.value) {
+    localSearchQuery.value = newValue;
+  }
+});
+
+watch(() => props.statusFilter, (newValue) => {
+  if (newValue !== localStatus.value) {
+    localStatus.value = newValue;
+  }
+});
+
+watch(() => props.tagFilter, (newValue) => {
+  if (newValue !== localTag.value) {
+    localTag.value = newValue;
+  }
 });
 
 // Status options for the status filter
@@ -106,6 +126,14 @@ const statusOptions = [
   { value: 'canceled', label: 'Canceled' },
   { value: 'done', label: 'Done' }
 ];
+
+// Status options with "All Statuses" option
+const statusOptionsWithAll = computed(() => {
+  return [
+    { value: null, label: 'All Statuses' },
+    ...statusOptions
+  ];
+});
 
 // Get tags from the tags store for the tag filter dropdown
 const availableTags = computed(() => {
@@ -118,47 +146,14 @@ const availableTags = computed(() => {
 // Check if any filters are active
 const hasActiveFilters = computed(() => {
   return (
-    (searchQuery.value && searchQuery.value.trim() !== '') ||
-    statusFilter.value !== null ||
-    tagFilter.value !== null
+    (localSearchQuery.value && localSearchQuery.value.trim() !== '') ||
+    localStatus.value !== null ||
+    localTag.value !== null
   );
 });
 
-// Handle search
-const handleSearch = () => {
-  // Process search query - trim and convert empty string to undefined
-  const searchTerm = searchQuery.value.trim() || undefined;
-
-  // Extract the actual value from status filter (handling both string and object formats)
-  const statusValue = statusFilter.value ?
-    (typeof statusFilter.value === 'object' && statusFilter.value !== null ?
-      statusFilter.value.value :
-      statusFilter.value) :
-    undefined;
-
-  // Extract the actual value from tag filter (handling both string and object formats)
-  const tagValue = tagFilter.value ?
-    (typeof tagFilter.value === 'object' && tagFilter.value !== null ?
-      tagFilter.value.value :
-      tagFilter.value) :
-    undefined;
-
-  // Update the store with the current filter values
-  tasksStore.updateFilters(
-    searchTerm || '',
-    statusFilter.value,
-    tagFilter.value
-  );
-
-  // Emit search event to parent component
-  emit('search', { searchTerm, statusValue, tagValue });
-};
-
 // Clear all filters
 const clearAllFilters = () => {
-  // Reset all filter values in the store
-  tasksStore.clearFilters();
-
   // Emit clearFilters event to parent component
   emit('clearFilters');
 };

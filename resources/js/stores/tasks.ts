@@ -75,34 +75,25 @@ export const useTasksStore = defineStore('tasks', {
      * @returns Array of tasks
      */
     async fetchTasks(search?: string, status?: string, tag?: string, forceReload: boolean = false) {
-      // Fetch from API if:
-      // - There's a search, status, or tag filter
-      // - The tasks array is empty
-      // - forceReload is true (indicating filters were explicitly cleared or initial load)
-      if (search || status || tag || this.tasks.length === 0 || forceReload) {
-        this.loading = true;
-        this.error = null;
+      this.loading = true;
+      this.error = null;
 
-        try {
-          let params: Record<string, any> = {};
-          if (search) params.search = search;
-          if (status) params.status = status;
-          if (tag) params.tag = tag;
+      try {
+        let params: Record<string, any> = {};
+        if (search) params.search = search;
+        if (status) params.status = status;
+        if (tag) params.tag = tag;
 
-          const options = Object.keys(params).length > 0 ? { params } : undefined;
-          const response = await indexTasks(options);
-          this.tasks = response.data.data || [];
-          return this.tasks;
-        } catch (error) {
-          this.error = 'Failed to fetch tasks';
-          return [];
-        } finally {
-          this.loading = false;
-        }
+        const options = Object.keys(params).length > 0 ? { params } : undefined;
+        const response = await indexTasks(options);
+        this.tasks = response.data.data || [];
+        return this.tasks;
+      } catch (error) {
+        this.error = 'Failed to fetch tasks';
+        return [];
+      } finally {
+        this.loading = false;
       }
-
-      // Otherwise, return the cached tasks
-      return this.tasks;
     },
 
     async fetchTask(id: number) {

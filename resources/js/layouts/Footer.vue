@@ -1,12 +1,12 @@
 <template>
   <footer class="bg-white py-4">
     <div class="container mx-auto px-4">
-      <div class="flex justify-between items-center">
+      <div class="flex justify-between items-center gap-y-1">
         <div class="text-gray-600 text-sm">
-          &copy; {{ currentYear }} Tasker. All rights reserved.
+          &copy; {{ currentYear }} Tasker
         </div>
         <div class="text-gray-600 text-sm">
-          A simple task management application
+          Simple task manager
         </div>
       </div>
     </div>
