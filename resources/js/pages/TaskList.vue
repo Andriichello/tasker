@@ -19,72 +19,11 @@
         </div>
       </div>
 
-      <!-- Filters Row -->
-      <div class="flex flex-wrap justify-start gap-4 mb-6">
-        <!-- Status Filter -->
-        <div class="w-64">
-          <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <Multiselect
-            id="statusFilter"
-            v-model="statusFilter"
-            :options="statusOptions"
-            :searchable="true"
-            :close-on-select="true"
-            :create-option="false"
-            mode="single"
-            placeholder="All Statuses"
-            class="border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            @update:model-value="handleSearch"
-          />
-        </div>
-
-        <!-- Tag Filter -->
-        <div class="w-64">
-          <label for="tagFilter" class="block text-sm font-medium text-gray-700 mb-1">Tag</label>
-          <Multiselect
-            id="tagFilter"
-            v-model="tagFilter"
-            :options="availableTags"
-            :searchable="true"
-            :close-on-select="true"
-            :create-option="false"
-            mode="single"
-            placeholder="All Tags"
-            class="border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            @update:model-value="handleSearch"
-          />
-        </div>
-      </div>
-
-      <!-- Centered Search Bar -->
-      <div class="flex justify-between items-center mb-4">
-        <div class="flex items-center w-full max-w-md">
-          <input
-            type="text"
-            v-model="searchQuery"
-            @keyup.enter="handleSearch"
-            placeholder="Search tasks..."
-            class="border border-gray-300 rounded-l px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            @click="handleSearch"
-            class="bg-blue-500 text-white p-[11px] rounded-r hover:bg-blue-600 flex items-center justify-center"
-            style="aspect-ratio: 1/1;"
-          >
-            <Search size="20" />
-          </button>
-        </div>
-
-        <!-- Clear Filters Button -->
-        <button
-          v-if="hasActiveFilters"
-          @click="clearAllFilters"
-          class="bg-gray-200 text-gray-700 px-3 py-2 rounded hover:bg-gray-300 flex items-center"
-        >
-          <span class="mr-1">Clear</span>
-          <X size="16" />
-        </button>
-      </div>
+      <!-- Task Filters Component -->
+      <TaskFilters
+        @search="handleFilterSearch"
+        @clearFilters="clearAllFilters"
+      />
 
       <!-- Loading state -->
       <div v-if="loading" class="flex justify-center items-center py-10">
@@ -103,102 +42,28 @@
 
       <!-- Task lists with tabs -->
       <div v-else class="space-y-6">
-        <!-- Tabs Navigation -->
-        <div class="border-b border-gray-200">
-          <nav class="flex -mb-px">
-            <button
-              @click="activeTab = 'all'"
-              :class="[
-              'py-2 px-4 text-center border-b-2 font-medium text-sm',
-              activeTab === 'all'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            ]"
-            >
-              All ({{ tasks.length }})
-            </button>
-            <button
-              @click="activeTab = 'public'"
-              :class="[
-              'py-2 px-4 text-center border-b-2 font-medium text-sm',
-              activeTab === 'public'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            ]"
-            >
-              Public ({{ publicTasks.length }})
-            </button>
-            <button
-              v-if="isAuthenticated"
-              @click="activeTab = 'private'"
-              :class="[
-              'py-2 px-4 text-center border-b-2 font-medium text-sm',
-              activeTab === 'private'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            ]"
-            >
-              Private ({{ privateTasks.length }})
-            </button>
-            <button
-              v-if="isAuthenticated"
-              @click="activeTab = 'my'"
-              :class="[
-              'py-2 px-4 text-center border-b-2 font-medium text-sm',
-              activeTab === 'my'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            ]"
-            >
-              My Tasks ({{ myTasks.length }})
-            </button>
-          </nav>
-        </div>
+        <!-- Task Tabs Component -->
+        <TaskTabs
+          v-model:activeTab="activeTab"
+          :counts="{
+            all: tasks.length,
+            public: publicTasks.length,
+            private: privateTasks.length,
+            my: myTasks.length
+          }"
+          :isAuthenticated="isAuthenticated"
+        />
 
         <!-- Task List -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
           <div class="divide-y">
-            <div
+            <TaskItem
               v-for="task in displayedTasks"
               :key="task.id"
-              :class="[
-              'p-4 hover:bg-gray-50 cursor-pointer',
-              authStore.user && task.user_id === authStore.user.id ? 'border-l-4 border-blue-500' : ''
-            ]"
-              @click="viewTask(task.id)"
-            >
-              <div class="flex justify-between items-start mb-2">
-                <h3 class="text-lg font-semibold">{{ task.title }}</h3>
-                <span
-                  :class="[
-                  'whitespace-nowrap text-xs px-2 py-1 rounded-full',
-                  task.status === 'to-do' ? 'bg-yellow-100 text-yellow-800' :
-                  task.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                  task.status === 'done' ? 'bg-green-100 text-green-800' :
-                  'bg-red-100 text-red-800'
-                ]"
-                >
-                {{ task.status }}
-              </span>
-              </div>
-              <p class="text-gray-600 mb-2">{{ truncateDescription(task.description) }}</p>
-              <div class="flex justify-between items-end mt-2">
-                <!-- User name in the down left corner -->
-                <div class="text-sm font-semibold" v-if="task.user">
-                  {{ task.user.name }}
-                </div>
-                <!-- Tags in the right down corner -->
-                <div class="flex flex-wrap gap-1 justify-end">
-                <span
-                  v-for="tag in task.tags"
-                  :key="tag"
-                  class="bg-gray-700 text-white text-xs px-2 py-1 rounded"
-                >
-                  {{ tag }}
-                </span>
-                </div>
-              </div>
-            </div>
+              :task="task"
+              :currentUserId="authStore.user?.id"
+              @click="viewTask"
+            />
           </div>
         </div>
       </div>
@@ -209,11 +74,10 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore, useTasksStore, useTagsStore } from '../stores';
 import type { Task } from '../api/models/task';
-import { Search, X } from 'lucide-vue-next';
-import Multiselect from '@vueform/multiselect';
-import '@vueform/multiselect/themes/default.css';
-import BaseLayout from "../layouts/BaseLayout.vue";
 import { useRouter } from 'vue-router';
+import TaskFilters from '../components/TaskFilters.vue';
+import TaskTabs from '../components/TaskTabs.vue';
+import TaskItem from '../components/TaskItem.vue';
 
 // Get stores and router
 const authStore = useAuthStore();
@@ -412,12 +276,29 @@ const handleSearch = () => {
   }
 };
 
-// Truncate description to 100 characters
-const truncateDescription = (description: string | null): string => {
-  if (!description) return '';
-  return description.length > 100
-    ? description.substring(0, 100) + '...'
-    : description;
+/**
+ * Handle filter search event from TaskFilters component
+ * @param filters Object containing searchTerm, statusValue, and tagValue
+ */
+const handleFilterSearch = (filters: { searchTerm?: string, statusValue?: string, tagValue?: string }) => {
+  const { searchTerm, statusValue, tagValue } = filters;
+
+  // Get previous filter values from the store
+  const previousSearchQuery = tasksStore.getSearchQuery;
+  const previousStatusFilter = tasksStore.getStatusFilter;
+  const previousTagFilter = tasksStore.getTagFilter;
+
+  // Check if each filter has been changed
+  const searchChanged = previousSearchQuery !== searchTerm;
+  const statusChanged = previousStatusFilter !== statusValue;
+  const tagChanged = previousTagFilter !== tagValue;
+
+  // Force reload if any filter has been changed
+  const forceReload = searchChanged || statusChanged || tagChanged;
+
+  // Send all filters to the backend, with forceReload if filters were changed
+  fetchTasks(searchTerm, statusValue, tagValue, forceReload);
+  lastSearchTime.value = Date.now();
 };
 
 // Navigate to task detail page
