@@ -250,7 +250,7 @@ onMounted(async () => {
 
   // Redirect to home if not authenticated
   if (!user) {
-    router.push('/');
+    await router.push('/');
     return;
   }
 

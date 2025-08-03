@@ -10,7 +10,7 @@ export interface AuthState {
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    token: null as string | null,
+    token: localStorage.getItem('token') as string | null,
     me: null as Me | null,
     isLoadingMe: false,
   } as AuthState),
@@ -21,19 +21,29 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
+    setToken(token: string | null) {
+      this.token = token;
+
+      if (token) {
+        localStorage.setItem('token', token);
+      } else {
+        localStorage.removeItem('token');
+      }
+    },
+
     async login(credentials: LoginRequest) {
       try {
         const response = await login(credentials);
         const { token, user } = response.data.data || {};
 
         if (token) {
-          this.token = token;
+          this.setToken(token);
           this.me = user || null;
           return true;
         }
         return false;
       } catch (error) {
-        this.token = null;
+        this.setToken(null);
         this.me = null;
         return false;
       }
@@ -72,7 +82,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     logout() {
-      this.token = null;
+      this.setToken(null);
       this.me = null;
     },
   },

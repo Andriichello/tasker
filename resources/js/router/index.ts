@@ -4,6 +4,7 @@ import Login from '../pages/Login.vue';
 import TaskDetail from '../pages/TaskDetail.vue';
 import TaskList from '../pages/TaskList.vue';
 import TaskForm from '../pages/TaskForm.vue';
+import {beforeGuard} from "@/middleware.ts";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -52,5 +53,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes
 });
+
+router.beforeEach(beforeGuard);
 
 export default router;
