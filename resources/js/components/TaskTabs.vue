@@ -7,7 +7,7 @@
           @click="setActiveTab('all')"
           :class="[
             'grow py-4 px-2 border-b-2 font-medium text-sm transition-colors',
-            activeTab === 'all'
+            !isAuthenticated || activeTab === 'all'
               ? 'border-blue-500 text-blue-600'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
           ]"
@@ -15,6 +15,7 @@
           All ({{ counts.all }})
         </button>
         <button
+          v-if="isAuthenticated"
           @click="setActiveTab('public')"
           :class="[
             'grow py-4 px-2 border-b-2 font-medium text-sm transition-colors',

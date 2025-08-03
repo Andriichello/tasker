@@ -30,7 +30,7 @@
             <div class="text-gray-500">{{ user.email }}</div>
           </div>
           <a href="#" @click.prevent="logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-            Logout
+            Log Out
           </a>
         </div>
       </div>
@@ -41,8 +41,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { ChevronDown, CheckSquareIcon } from 'lucide-vue-next';
-import { useAuthStore } from '../stores';
-import type { Me } from '../api/models/me';
+import {useAuthStore} from '@/stores';
+import type { Me } from '@/api';
 import { useRouter } from 'vue-router';
 
 // Get auth store and router
@@ -80,7 +80,7 @@ const logout = () => {
   showDropdown.value = false;
 
   // Redirect to home page using router
-  router.push('/');
+  router.push('/login');
 };
 
 onMounted(() => {

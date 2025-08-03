@@ -8,7 +8,7 @@ export interface AuthState {
   isLoadingMe: boolean;
 }
 
-const TOKEN_STORAGE_KEY = 'tasker-token';
+export const TOKEN_STORAGE_KEY = 'tasker-token';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({

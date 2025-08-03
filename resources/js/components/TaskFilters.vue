@@ -1,6 +1,6 @@
 <template>
   <div class="">
-    <div class="flex flex-wrap items-center justify-between mb-4">
+    <div class="min-h-[30px] flex flex-wrap items-center justify-between mb-4">
       <h2 class="text-xl font-bold text-gray-900">Filters</h2>
       <!-- Clear Filters Button -->
       <button
@@ -12,7 +12,7 @@
       </button>
     </div>
 
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-wrap gap-4">
       <!-- Search Input -->
       <div class="flex-1">
         <div class="relative">
@@ -23,16 +23,16 @@
             @keyup.enter="handleSearch"
             @blur="handleSearch"
             placeholder="Search tasks..."
-            class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            class="w-full min-w-xs max-w-3xs pl-10 pr-4 py-3 border border-gray-300 rounded-lg transition-colors"
           />
         </div>
       </div>
 
-      <div class="flex flex-wrap gap-3">
+      <div class="flex flex-row flex-wrap gap-3">
         <!-- Status Filter -->
         <select
           v-model="statusFilter"
-          class="px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          class="min-w-3xs px-4 py-3 border border-gray-300 rounded-lg transition-colors"
           @change="handleSearch"
         >
           <option :value="null">All Statuses</option>
@@ -42,7 +42,7 @@
         <!-- Tag Filter -->
         <select
           v-model="tagFilter"
-          class="px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          class="min-w-3xs px-4 py-3 border border-gray-300 rounded-lg transition-colors"
           @change="handleSearch"
         >
           <option :value="null">All Tags</option>
