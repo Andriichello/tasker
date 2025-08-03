@@ -2,12 +2,18 @@ import { defineStore } from 'pinia';
 import { indexTags } from '@/api';
 import type { Tag } from '@/api';
 
+export interface TagsState {
+  tags: Tag[];
+  loading: boolean;
+  error: string | null;
+}
+
 export const useTagsStore = defineStore('tags', {
   state: () => ({
     tags: [] as Tag[],
     loading: false,
     error: null as string | null,
-  }),
+  }) as TagsState,
 
   getters: {
     getTags: (state) => state.tags,

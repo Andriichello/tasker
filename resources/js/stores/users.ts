@@ -2,13 +2,20 @@ import { defineStore } from 'pinia';
 import { indexUsers, showUser } from '@/api';
 import type { User } from '@/api';
 
+export interface UsersState {
+  users: User[];
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+}
+
 export const useUsersStore = defineStore('users', {
   state: () => ({
     users: [] as User[],
     user: null as User | null,
     loading: false,
     error: null as string | null,
-  }),
+  }) as UsersState,
 
   getters: {
     getUsers: (state) => state.users,

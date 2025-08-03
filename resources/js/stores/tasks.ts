@@ -8,6 +8,16 @@ import {
 } from '@/api';
 import type { Task, StoreTaskRequest, UpdateTaskRequest  } from '@/api';
 
+export interface TasksState {
+  tasks: Task[];
+  task: Task | null;
+  searchQuery: string;
+  statusFilter: any;
+  tagFilter: any;
+  loading: boolean;
+  error: string | null;
+}
+
 // Local storage key for task filters
 const TASK_FILTERS_STORAGE_KEY = 'tasker-filters';
 
@@ -37,7 +47,7 @@ export const useTasksStore = defineStore('tasks', {
       tagFilter: savedFilters.tagFilter || null,
       loading: false,
       error: null as string | null,
-    };
+    } as TasksState;
   },
 
   getters: {
@@ -49,6 +59,9 @@ export const useTasksStore = defineStore('tasks', {
     isLoading: (state) => state.loading,
     hasError: (state) => !!state.error,
     getError: (state) => state.error,
+    getTags(state) {
+
+    },
   },
 
   actions: {
