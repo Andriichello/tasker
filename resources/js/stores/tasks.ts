@@ -8,16 +8,37 @@ import {
 } from '@/api';
 import type { Task, StoreTaskRequest, UpdateTaskRequest  } from '@/api';
 
+// Local storage key for task filters
+const TASK_FILTERS_STORAGE_KEY = 'tasker-filters';
+
+// Helper function to get filters from local storage
+const getFiltersFromStorage = (): { searchQuery: string, statusFilter: any, tagFilter: any } => {
+  try {
+    const storedFilters = localStorage.getItem(TASK_FILTERS_STORAGE_KEY);
+    if (storedFilters) {
+      return JSON.parse(storedFilters);
+    }
+  } catch (error) {
+    console.error('Error reading filters from localStorage:', error);
+  }
+  return { searchQuery: '', statusFilter: null, tagFilter: null };
+};
+
 export const useTasksStore = defineStore('tasks', {
-  state: () => ({
-    tasks: [] as Task[],
-    task: null as Task | null,
-    searchQuery: '',
-    statusFilter: null,
-    tagFilter: null,
-    loading: false,
-    error: null as string | null,
-  }),
+  state: () => {
+    // Get saved filters from local storage
+    const savedFilters = getFiltersFromStorage();
+
+    return {
+      tasks: [] as Task[],
+      task: null as Task | null,
+      searchQuery: savedFilters.searchQuery || '',
+      statusFilter: savedFilters.statusFilter || null,
+      tagFilter: savedFilters.tagFilter || null,
+      loading: false,
+      error: null as string | null,
+    };
+  },
 
   getters: {
     getTasks: (state) => state.tasks,
@@ -183,6 +204,20 @@ export const useTasksStore = defineStore('tasks', {
       this.error = null;
     },
 
+    // Helper method to save filters to localStorage
+    saveFiltersToStorage() {
+      try {
+        const filtersToSave = {
+          searchQuery: this.searchQuery,
+          statusFilter: this.statusFilter,
+          tagFilter: this.tagFilter
+        };
+        localStorage.setItem(TASK_FILTERS_STORAGE_KEY, JSON.stringify(filtersToSave));
+      } catch (error) {
+        console.error('Error saving filters to localStorage:', error);
+      }
+    },
+
     // Update filter values
     updateFilters(searchQuery?: string, statusFilter?: any, tagFilter?: any) {
       if (searchQuery !== undefined) this.searchQuery = searchQuery;
@@ -194,6 +229,9 @@ export const useTasksStore = defineStore('tasks', {
         // Convert empty string to null for tag filter
         this.tagFilter = tagFilter === '' ? null : tagFilter;
       }
+
+      // Save updated filters to localStorage
+      this.saveFiltersToStorage();
     },
 
     // Clear all filters
@@ -201,6 +239,13 @@ export const useTasksStore = defineStore('tasks', {
       this.searchQuery = '';
       this.statusFilter = null;
       this.tagFilter = null;
+
+      // Remove filters from localStorage
+      try {
+        localStorage.removeItem(TASK_FILTERS_STORAGE_KEY);
+      } catch (error) {
+        console.error('Error removing filters from localStorage:', error);
+      }
     }
   },
 });
