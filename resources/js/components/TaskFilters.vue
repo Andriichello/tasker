@@ -19,7 +19,7 @@
           <SearchIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
             type="text"
-            v-model="searchQuery"
+            v-model="localSearchQuery"
             @keyup.enter="handleSearch"
             @blur="handleSearch"
             placeholder="Search tasks..."
@@ -54,9 +54,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useTasksStore, useTagsStore } from '../stores';
 import { SearchIcon, XIcon } from 'lucide-vue-next';
+import { debounce } from 'lodash';
 
 // Get stores
 const tasksStore = useTasksStore();
@@ -65,7 +66,24 @@ const tagsStore = useTagsStore();
 // Emits
 const emit = defineEmits(['search', 'clearFilters']);
 
-// Use computed properties for filter values to sync with the store
+// Create a local ref for the search input with debounce
+const localSearchQuery = ref(tasksStore.getSearchQuery || '');
+
+// Create a debounced function using lodash
+const debouncedSearch = debounce((newValue: string) => {
+  tasksStore.updateFilters(newValue, undefined, undefined);
+  // Only trigger search if we have a value or had a value before
+  if (newValue.trim() !== '' || tasksStore.getSearchQuery) {
+    handleSearch();
+  }
+}, 500);
+
+// Set up a watcher to call the debounced function
+watch(localSearchQuery, (newValue) => {
+  debouncedSearch(newValue);
+});
+
+// Keep the computed property for other parts of the code that might use it
 const searchQuery = computed({
   get: () => tasksStore.getSearchQuery,
   set: (value) => tasksStore.updateFilters(value, undefined, undefined)
