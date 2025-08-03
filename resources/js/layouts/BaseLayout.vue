@@ -2,9 +2,7 @@
   <div class="flex flex-col min-h-screen">
     <Navbar />
     <main class="flex-grow">
-      <div class="container mx-auto px-4 py-6">
-        <slot></slot>
-      </div>
+      <slot></slot>
     </main>
     <Footer />
   </div>

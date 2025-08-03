@@ -1,22 +1,20 @@
 <template>
-  <div class="container mx-auto py-6">
-      <div class="flex justify-between items-center mb-6">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
+    <div class="container mx-auto px-6">
+      <!-- Page Header -->
+      <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="text-2xl font-bold">Tasks</h1>
-          <p v-if="isAuthenticated" class="text-sm text-gray-600 mt-1">
-            <span class="inline-block w-3 h-3 bg-blue-500 mr-1"></span>
-            Tasks with blue border are yours
-          </p>
+          <h2 class="text-3xl font-bold text-gray-900 mb-2">My Tasks</h2>
+          <p class="text-gray-600">Manage your tasks efficiently</p>
         </div>
-        <div>
-          <button
-            v-if="isAuthenticated"
-            @click="createTask"
-            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Create Task
-          </button>
-        </div>
+        <button
+          v-if="isAuthenticated"
+          @click="createTask"
+          class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 font-medium"
+        >
+          <PlusIcon class="h-5 w-5" />
+          Create Task
+        </button>
       </div>
 
       <!-- Task Filters Component -->
@@ -36,8 +34,19 @@
       </div>
 
       <!-- Empty state -->
-      <div v-else-if="tasks.length === 0" class="text-center py-10 bg-gray-50 rounded">
-        <p class="text-gray-500">No tasks found</p>
+      <div v-else-if="tasks.length === 0" class="text-center py-16">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <ListIcon class="h-8 w-8 text-gray-400" />
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
+        <p class="text-gray-500 mb-6">Create your first task to get started</p>
+        <button
+          v-if="isAuthenticated"
+          @click="createTask"
+          class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        >
+          Create Your First Task
+        </button>
       </div>
 
       <!-- Task lists with tabs -->
@@ -55,8 +64,8 @@
         />
 
         <!-- Task List -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="divide-y">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="flex flex-col gap-4 p-4">
             <TaskItem
               v-for="task in displayedTasks"
               :key="task.id"
@@ -68,6 +77,7 @@
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -78,6 +88,7 @@ import { useRouter } from 'vue-router';
 import TaskFilters from '../components/TaskFilters.vue';
 import TaskTabs from '../components/TaskTabs.vue';
 import TaskItem from '../components/TaskItem.vue';
+import { PlusIcon, ListIcon } from 'lucide-vue-next';
 
 // Get stores and router
 const authStore = useAuthStore();

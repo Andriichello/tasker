@@ -53,7 +53,7 @@ class TaskResource extends JsonResource
      *   @OA\Property(property="created_at", type="string", format="date-time", nullable=true),
      *   @OA\Property(property="updated_at", type="string", format="date-time", nullable=true),
      *   @OA\Property(property="tags", type="array", @OA\Items(type="string")),
-     *   @OA\Property(property="user", nullable="true", ref ="#/components/schemas/User"),
+     *   @OA\Property(property="user", nullable=true, ref ="#/components/schemas/User"),
      * )
      */
 }

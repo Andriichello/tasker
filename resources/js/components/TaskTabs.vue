@@ -1,54 +1,56 @@
 <template>
   <!-- Tabs Navigation -->
-  <div class="border-b border-gray-200">
-    <nav class="flex -mb-px">
-      <button
-        @click="setActiveTab('all')"
-        :class="[
-          'py-2 px-4 text-center border-b-2 font-medium text-sm',
-          activeTab === 'all'
-            ? 'border-blue-500 text-blue-600'
-            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-        ]"
-      >
-        All ({{ counts.all }})
-      </button>
-      <button
-        @click="setActiveTab('public')"
-        :class="[
-          'py-2 px-4 text-center border-b-2 font-medium text-sm',
-          activeTab === 'public'
-            ? 'border-blue-500 text-blue-600'
-            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-        ]"
-      >
-        Public ({{ counts.public }})
-      </button>
-      <button
-        v-if="isAuthenticated"
-        @click="setActiveTab('private')"
-        :class="[
-          'py-2 px-4 text-center border-b-2 font-medium text-sm',
-          activeTab === 'private'
-            ? 'border-blue-500 text-blue-600'
-            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-        ]"
-      >
-        Private ({{ counts.private }})
-      </button>
-      <button
-        v-if="isAuthenticated"
-        @click="setActiveTab('my')"
-        :class="[
-          'py-2 px-4 text-center border-b-2 font-medium text-sm',
-          activeTab === 'my'
-            ? 'border-blue-500 text-blue-600'
-            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-        ]"
-      >
-        My Tasks ({{ counts.my }})
-      </button>
-    </nav>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+    <div class="border-b border-gray-200">
+      <nav class="flex space-x-8 px-6">
+        <button
+          @click="setActiveTab('all')"
+          :class="[
+            'py-4 px-2 border-b-2 font-medium text-sm transition-colors',
+            activeTab === 'all'
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          ]"
+        >
+          All ({{ counts.all }})
+        </button>
+        <button
+          @click="setActiveTab('public')"
+          :class="[
+            'py-4 px-2 border-b-2 font-medium text-sm transition-colors',
+            activeTab === 'public'
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          ]"
+        >
+          Public ({{ counts.public }})
+        </button>
+        <button
+          v-if="isAuthenticated"
+          @click="setActiveTab('private')"
+          :class="[
+            'py-4 px-2 border-b-2 font-medium text-sm transition-colors',
+            activeTab === 'private'
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          ]"
+        >
+          Private ({{ counts.private }})
+        </button>
+        <button
+          v-if="isAuthenticated"
+          @click="setActiveTab('my')"
+          :class="[
+            'py-4 px-2 border-b-2 font-medium text-sm transition-colors',
+            activeTab === 'my'
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          ]"
+        >
+          My Tasks ({{ counts.my }})
+        </button>
+      </nav>
+    </div>
   </div>
 </template>
 
