@@ -1,6 +1,6 @@
 <template>
   <div @click="$emit('click', task.id)">
-    <div class="bg-gray-50 rounded-lg p-5 border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col gap-4">
+    <div class="rounded-lg p-5 border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col gap-4">
       <!-- Task Header -->
       <div class="flex items-start justify-between gap-2">
         <div class="flex flex-col flex-1 gap-2">
@@ -29,7 +29,7 @@
       </div>
 
       <!-- Task Meta -->
-      <div class="flex flex-wrap items-center justify-between gap-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-y-3 gap-5">
         <div class="flex items-center gap-2">
           <span class="px-3 py-1 text-xs font-medium rounded-full flex items-center gap-1.5"
                 :class="[getStatusStyle(task.status)]">
@@ -53,8 +53,8 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-5">
-          <div v-if="tags.length > 0" class="flex gap-1">
+        <div class="grow flex justify-end items-center gap-5">
+          <div v-if="tags.length > 0" class="flex justify-end grow gap-1">
               <span v-for="tag in tags.slice(0, 3)" :key="tag"
                     class="px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded-md font-medium">
                 {{ tag }}
@@ -65,7 +65,7 @@
             </span>
           </div>
 
-          <span class="text-xs text-gray-500"
+          <span class="w-fit text-xs text-gray-500"
                 v-if="task.created_at || task.updated_at">
             {{ formatDate(task.created_at || task.updated_at as string) }}
           </span>

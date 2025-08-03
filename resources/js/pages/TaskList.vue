@@ -1,8 +1,8 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
-    <div class="container mx-auto px-6">
+    <div class="container mx-auto">
       <!-- Page Header -->
-      <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center justify-between mb-8 px-4">
         <div>
           <h2 class="text-3xl font-bold text-gray-900 mb-2">My Tasks</h2>
           <p class="text-gray-600">Manage your tasks efficiently</p>
@@ -18,12 +18,12 @@
       </div>
 
       <!-- Task Filters Component -->
-      <TaskFilters class="mb-8"
+      <TaskFilters class="mb-8 px-4"
         @search="handleFilterSearch"
         @clearFilters="clearAllFilters"/>
 
       <!-- Loading state -->
-      <div v-if="loading" class="flex justify-center items-center py-10">
+      <div v-if="loading" class="flex justify-center items-center py-10 px-4">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
       </div>
 
@@ -33,7 +33,7 @@
       </div>
 
       <!-- Empty state -->
-      <div v-else-if="tasks.length === 0" class="text-center py-16">
+      <div v-else-if="tasks.length === 0" class="text-center py-16 px-4">
         <div class="w-16 h-16 bg-gray-200/60 rounded-full flex items-center justify-center mx-auto mb-4">
           <ListIcon class="h-8 w-8 text-gray-400" />
         </div>
@@ -45,9 +45,9 @@
       </div>
 
       <!-- Task lists with tabs -->
-      <div v-else class="space-y-6">
+      <div v-else class="space-y-2">
         <!-- Task Tabs Component -->
-        <TaskTabs
+        <TaskTabs class="mb-4 mx-4"
           v-model:activeTab="activeTab"
           :counts="{
             all: tasks.length,
@@ -59,16 +59,12 @@
         />
 
         <!-- Task List -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div class="flex flex-col gap-4 p-4">
-            <TaskItem
-              v-for="task in displayedTasks"
-              :key="task.id"
-              :task="task"
-              :currentUserId="authStore.user?.id"
-              @click="viewTask"
-            />
-          </div>
+        <div class="flex flex-col gap-3 overflow-hidden px-4 pb-20">
+          <TaskItem v-for="task in displayedTasks" :key="task.id"
+                    class="bg-white shadow-xs rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-200"
+                    :task="task"
+                    :currentUserId="authStore.user?.id"
+                    @click="viewTask"/>
         </div>
       </div>
     </div>
@@ -77,8 +73,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useAuthStore, useTasksStore, useTagsStore } from '../stores';
-import type { Task } from '../api/models/task';
+import { useAuthStore, useTasksStore, useTagsStore } from '@/stores';
+import type { Task } from '@/api';
 import { useRouter } from 'vue-router';
 import TaskFilters from '../components/TaskFilters.vue';
 import TaskTabs from '../components/TaskTabs.vue';
