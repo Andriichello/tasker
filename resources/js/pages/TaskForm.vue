@@ -1,6 +1,5 @@
 <template>
-  <BaseLayout>
-    <div class="container mx-auto py-6">
+  <div class="container mx-auto py-6">
       <h1 class="text-3xl font-bold mb-6">{{ isEditMode ? 'Edit Task' : 'Create New Task' }}</h1>
 
       <!-- Loading state (for edit mode) -->
@@ -129,7 +128,6 @@
         </div>
       </form>
     </div>
-  </BaseLayout>
 </template>
 
 <script setup lang="ts">

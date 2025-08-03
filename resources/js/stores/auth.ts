@@ -3,29 +3,15 @@ import { login, me } from '../api/services/auth';
 import type { Me } from '../api/models/me';
 import type { LoginRequest } from '../api/models/loginRequest';
 
-// Helper function to load persisted state from localStorage
-const loadPersistedState = (key: string) => {
-  try {
-    const storedState = localStorage.getItem(`pinia-${key}`);
-    return storedState ? JSON.parse(storedState) : null;
-  } catch (e) {
-    console.error(`Error loading persisted state for ${key}:`, e);
-    return null;
-  }
-};
-
-// Get persisted user data
-const persistedState = loadPersistedState('auth');
-
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: localStorage.getItem('token') || null as string | null,
-    me: persistedState?.me || null as Me | null,
+    me: null as Me | null,
     isLoadingMe: false,
   }),
 
   getters: {
-    isAuthenticated: (state) => !!state.token,
+    isAuthenticated: (state) => !!state.token && state.me,
     user: (state) => state.me,
   },
 
@@ -41,8 +27,6 @@ export const useAuthStore = defineStore('auth', {
           this.token = token;
           this.me = user || null;
           localStorage.setItem('token', token);
-          // Persist user data
-          this.persistState();
           return true;
         }
         return false;
@@ -50,7 +34,6 @@ export const useAuthStore = defineStore('auth', {
         this.token = null;
         this.me = null;
         localStorage.removeItem('token');
-        localStorage.removeItem('pinia-auth');
         return false;
       }
     },
@@ -79,8 +62,6 @@ export const useAuthStore = defineStore('auth', {
 
           if (response.status === 200) {
             this.me = response.data.data;
-            // Persist user data
-            this.persistState();
             return this.me;
           } else {
             // If the request fails, the token is invalid
@@ -104,18 +85,6 @@ export const useAuthStore = defineStore('auth', {
       this.token = null;
       this.me = null;
       localStorage.removeItem('token');
-      localStorage.removeItem('pinia-auth');
-    },
-
-    // Persist state to localStorage
-    persistState() {
-      try {
-        localStorage.setItem('pinia-auth', JSON.stringify({
-          me: this.me
-        }));
-      } catch (e) {
-        console.error('Error persisting auth state:', e);
-      }
     },
   },
 });

@@ -1,5 +1,5 @@
 import axios, { AxiosHeaders } from 'axios';
-import type { AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
+import type { InternalAxiosRequestConfig } from 'axios';
 
 // Declare axios on a window interface
 declare global {

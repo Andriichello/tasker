@@ -1,6 +1,5 @@
 <template>
-  <BaseLayout>
-    <div class="container mx-auto py-6">
+  <div class="container mx-auto py-6">
       <!-- Loading state -->
       <div v-if="loading" class="flex justify-center items-center py-10">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
@@ -118,7 +117,6 @@
         </div>
       </div>
     </div>
-  </BaseLayout>
 </template>
 
 <script setup lang="ts">
@@ -127,7 +125,8 @@ import { ArrowLeft } from 'lucide-vue-next';
 import { useAuthStore, useTasksStore } from '../stores';
 import type { Task } from '../api/models/task';
 import type { Me } from '../api/models/me';
-import BaseLayout from "../layouts/BaseLayout.vue";
+import BaseLayout from '../layouts/BaseLayout.vue';
+import type {UpdateTaskRequestStatus} from '@/api';
 
 // Get stores
 const authStore = useAuthStore();
@@ -200,7 +199,7 @@ const deleteTask = async (): Promise<void> => {
 const updateStatus = async (): Promise<void> => {
   try {
     const updatedTask = await tasksStore.updateTask(taskId, {
-      status: newStatus.value
+      status: newStatus.value as UpdateTaskRequestStatus | undefined
     });
 
     if (!updatedTask) {

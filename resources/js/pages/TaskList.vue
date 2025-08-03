@@ -1,6 +1,5 @@
 <template>
-  <BaseLayout>
-    <div class="container mx-auto py-6">
+  <div class="container mx-auto py-6">
       <div class="flex justify-between items-center mb-6">
         <div>
           <h1 class="text-2xl font-bold">Tasks</h1>
@@ -204,7 +203,6 @@
         </div>
       </div>
     </div>
-  </BaseLayout>
 </template>
 
 <script setup lang="ts">
