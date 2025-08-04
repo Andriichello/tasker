@@ -107,6 +107,8 @@ class TaskApiController extends CrudController
             'user_id' => $user->id,
         ]);
 
+        $task->load('user');
+
         return $this->asResourceResponse($task);
     }
 
@@ -130,6 +132,8 @@ class TaskApiController extends CrudController
         // The repository will handle tag synchronization internally
         // If tags are provided, they will be attached/detached as needed
         $this->repository->update($task, $attributes);
+
+        $task->load('user');
 
         return $this->asResourceResponse($task);
     }

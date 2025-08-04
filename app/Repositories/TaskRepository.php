@@ -95,7 +95,11 @@ class TaskRepository extends CrudRepository
         $result = parent::update($model, $attributes);
 
         if ($tags !== null) {
-            $this->syncTags($model, $tags);
+            $changed = $this->syncTags($model, $tags);
+
+            if ($changed) {
+                $model->touch();
+            }
         }
 
         return $result;
@@ -108,9 +112,9 @@ class TaskRepository extends CrudRepository
      * @param Task $task
      * @param array $tagNames
      *
-     * @return void
+     * @return bool
      */
-    protected function syncTags(Task $task, array $tagNames): void
+    protected function syncTags(Task $task, array $tagNames): bool
     {
         $tagIds = [];
 
@@ -122,6 +126,8 @@ class TaskRepository extends CrudRepository
             $tagIds[] = $tag->id;
         }
 
-        $task->tags()->sync($tagIds);
+        $array = $task->tags()->sync($tagIds);
+
+        return count($array['attached']) || count($array['detached']) || count($array['updated']);
     }
 }
