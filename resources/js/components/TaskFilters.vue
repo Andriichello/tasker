@@ -105,19 +105,19 @@ watch(() => props.searchQuery, (newValue) => {
   if (newValue !== localSearchQuery.value) {
     localSearchQuery.value = newValue;
   }
-});
+}, {immediate: true});
 
 watch(() => props.statusFilter, (newValue) => {
   if (newValue !== localStatus.value) {
     localStatus.value = newValue;
   }
-});
+}, {immediate: true});
 
 watch(() => props.tagFilter, (newValue) => {
   if (newValue !== localTag.value) {
     localTag.value = newValue;
   }
-});
+}, {immediate: true});
 
 // Status options for the status filter
 const statusOptions = [
