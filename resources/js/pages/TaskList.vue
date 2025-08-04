@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-[calc(100vh-116px)] bg-gradient-to-br from-gray-50 to-gray-100 py-8">
-    <div class="container mx-auto">
+    <div class="max-w-5xl container mx-auto">
       <!-- Page Header -->
       <div class="flex items-center justify-between mb-8 px-4">
         <div>
