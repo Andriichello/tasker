@@ -1,142 +1,175 @@
 <template>
-  <div class="container mx-auto py-6">
-      <h1 class="text-3xl font-bold mb-6">{{ isEditMode ? 'Edit Task' : 'Create New Task' }}</h1>
+  <div class="min-h-[calc(100vh-116px)]  bg-gradient-to-br from-gray-50 to-gray-100">
+    <div class="container mx-auto px-6 py-8">
+      <div class="max-w-3xl mx-auto">
+        <!-- Page Header -->
+        <div class="mb-8">
+          <button
+            @click="goBack"
+            class="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-4"
+          >
+            <ArrowLeft class="h-4 w-4" />
+            Back
+          </button>
+          <h2 class="text-3xl font-bold text-gray-900 mb-2">{{ isEditMode ? 'Edit Task' : 'Create New Task' }}</h2>
+          <p class="text-gray-600">{{ isEditMode ? 'Update your task details' : 'Add a new task to your list' }}</p>
+        </div>
 
-      <!-- Loading state (for edit mode) -->
-      <div v-if="loading" class="flex justify-center items-center py-10">
-        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
-      </div>
+        <!-- Loading state (for edit mode) -->
+        <div v-if="loading" class="flex justify-center items-center py-16">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
 
-      <!-- Error state -->
-      <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-        {{ error }}
-        <div class="mt-4">
-          <button @click="goBack" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+        <!-- Error state -->
+        <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
+          <div class="flex items-center gap-2 mb-4">
+            <AlertCircle class="h-5 w-5 text-red-500" />
+            <p class="text-red-700 font-medium">{{ error }}</p>
+          </div>
+          <button
+            @click="goBack"
+            class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
+          >
+            <ArrowLeft class="h-4 w-4" />
             Back
           </button>
         </div>
-      </div>
 
-      <!-- Form -->
-      <form v-else @submit.prevent="submitForm" class="bg-white rounded-lg shadow-md p-6">
-        <!-- Title -->
-        <div class="mb-4">
-          <label for="title" class="block text-gray-700 font-semibold mb-2">Title *</label>
-          <input
-            type="text"
-            id="title"
-            v-model="form.title"
-            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          >
-        </div>
+        <!-- Form -->
+        <div v-else class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+          <form @submit.prevent="submitForm" class="space-y-6">
+            <div>
+              <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Task Title *</label>
+              <input
+                v-model="form.title"
+                type="text"
+                id="title"
+                placeholder="Enter a descriptive title for your task"
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                required
+              />
+            </div>
 
-        <!-- Description -->
-        <div class="mb-4">
-          <label for="description" class="block text-gray-700 font-semibold mb-2">Description</label>
-          <textarea
-            id="description"
-            v-model="form.description"
-            rows="5"
-            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          ></textarea>
-        </div>
+            <div>
+              <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+              <textarea
+                v-model="form.description"
+                id="description"
+                rows="4"
+                placeholder="Provide more details about this task..."
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+              ></textarea>
+            </div>
 
-        <!-- Status -->
-        <div class="mb-4">
-          <label for="status" class="block text-gray-700 font-semibold mb-2">Status *</label>
-          <select
-            id="status"
-            v-model="form.status"
-            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          >
-            <option value="to-do">To Do</option>
-            <option value="in-progress">In Progress</option>
-            <option value="done">Done</option>
-            <option value="canceled">Canceled</option>
-          </select>
-        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <select
+                  v-model="form.status"
+                  id="status"
+                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  required
+                >
+                  <option value="to-do">To Do</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="done">Done</option>
+                  <option value="canceled">Canceled</option>
+                </select>
+              </div>
 
-        <!-- Visibility -->
-        <div class="mb-4">
-          <label for="visibility" class="block text-gray-700 font-semibold mb-2">Visibility *</label>
-          <select
-            id="visibility"
-            v-model="form.visibility"
-            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          >
-            <option value="public">Public</option>
-            <option value="private">Private</option>
-          </select>
-        </div>
+              <div>
+                <label for="visibility" class="block text-sm font-medium text-gray-700 mb-2">Visibility</label>
+                <select
+                  v-model="form.visibility"
+                  id="visibility"
+                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  required
+                >
+                  <option value="public">Public</option>
+                  <option value="private">Private</option>
+                </select>
+              </div>
+            </div>
 
-        <!-- Tags -->
-        <div class="mb-6">
-          <label class="block text-gray-700 font-semibold mb-2">Tags</label>
-          <div class="flex flex-wrap gap-2 mb-2">
-            <div
-              v-for="(tag, index) in form.tags"
-              :key="index"
-              class="bg-blue-100 text-blue-800 px-3 py-1 rounded flex items-center"
-            >
-              {{ tag }}
+            <!-- Interactive Tags Input -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+              <div class="space-y-3">
+                <!-- Tag Input -->
+                <div class="flex gap-2">
+                  <input
+                    v-model="newTag"
+                    type="text"
+                    placeholder="Enter a tag"
+                    class="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    @keydown.enter.prevent="addTag"
+                  />
+                  <button
+                    type="button"
+                    @click="addTag"
+                    class="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  >
+                    Add
+                  </button>
+                </div>
+                <p class="text-xs text-gray-500">Press Enter or click Add to add a tag</p>
+
+                <!-- Tag Display -->
+                <div v-if="form.tags && form.tags.length > 0" class="flex flex-wrap gap-2">
+                  <span
+                    v-for="(tag, index) in form.tags"
+                    :key="index"
+                    class="inline-flex items-center gap-1 px-2 py-1 bg-gray-200 text-gray-600 rounded-md text-s, font-medium"
+                  >
+                    {{ tag }}
+                    <button
+                      type="button"
+                      @click="removeTag(index)"
+                      class="ml-1 text-gray-500 hover:text-gray-700 transition-colors"
+                    >
+                      <X class="h-3 w-3" />
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-4 pt-6">
               <button
                 type="button"
-                @click="removeTag(index)"
-                class="ml-2 text-blue-600 hover:text-blue-800"
+                @click="goBack"
+                class="flex-1 px-6 py-3 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
               >
-                &times;
+                Cancel
+              </button>
+              <button
+                type="submit"
+                :disabled="submitting"
+                class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <Loader v-if="submitting" class="h-5 w-5 animate-spin" />
+                {{ submitting ? 'Saving...' : (isEditMode ? 'Update Task' : 'Create Task') }}
               </button>
             </div>
-          </div>
-          <div class="flex">
-            <input
-              type="text"
-              v-model="newTag"
-              @keydown.enter.prevent="addTag"
-              placeholder="Add a tag and press Enter"
-              class="flex-grow px-3 py-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-            <button
-              type="button"
-              @click="addTag"
-              class="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600"
-            >
-              Add
-            </button>
-          </div>
+          </form>
         </div>
-
-        <!-- Form buttons -->
-        <div class="flex justify-between">
-          <button
-            type="button"
-            @click="goBack"
-            class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            :disabled="submitting"
-          >
-            {{ submitting ? 'Saving...' : (isEditMode ? 'Update Task' : 'Create Task') }}
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import {
+  ArrowLeft,
+  AlertCircle,
+  X,
+  Loader
+} from 'lucide-vue-next';
 import { useAuthStore, useTasksStore } from '../stores';
 import type { Task } from '../api/models/task';
 import type { StoreTaskRequest } from '../api/models/storeTaskRequest';
 import type { UpdateTaskRequest } from '../api/models/updateTaskRequest';
-import BaseLayout from "../layouts/BaseLayout.vue";
 import { useRouter, useRoute } from 'vue-router';
 
 // Get stores, router and route
@@ -260,3 +293,9 @@ onMounted(async () => {
   }
 });
 </script>
+
+<style scoped>
+.container {
+  max-width: 1400px;
+}
+</style>

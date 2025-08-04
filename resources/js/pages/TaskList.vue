@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
+  <div class="min-h-[calc(100vh-116px)] bg-gradient-to-br from-gray-50 to-gray-100 py-8">
     <div class="container mx-auto">
       <!-- Page Header -->
       <div class="flex items-center justify-between mb-8 px-4">
@@ -79,7 +79,7 @@
       </div>
 
       <!-- Delete confirmation modal -->
-      <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div v-if="showDeleteModal" class="fixed inset-0 bg-black/80 bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
           <h3 class="text-xl font-bold text-gray-900 mb-4">Confirm Delete</h3>
           <p class="text-gray-600 mb-6">Are you sure you want to delete this task? This action cannot be undone.</p>

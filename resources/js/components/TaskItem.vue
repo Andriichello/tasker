@@ -67,7 +67,7 @@
 
           <span class="w-fit text-xs text-gray-500"
                 v-if="task.created_at || task.updated_at">
-            {{ formatDate(task.created_at || task.updated_at as string) }}
+            {{ formatDate(task.updated_at || task.created_at as string) }}
           </span>
         </div>
       </div>
